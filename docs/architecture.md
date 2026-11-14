@@ -93,6 +93,7 @@ src/
   ui/hud.js  ui/dashboard.js  ui/menu.js
   audio/engine-sound.js  the audio context and the continuous sounds;  audio/effects.js  one-shot sounds
   input/keys.js          keydown/keyup/mouse -> keys and toggles in S
+  settings.js            remembered choices (car, gearbox mode, camera) in browser storage, key highway-dash:v1:settings
 tests/                   scripted headless checks (see section 8)
 ```
 Differences from the plan that preceded the split, and why:
@@ -147,7 +148,7 @@ The target is a steady 60 fps at 1280 × 720 on a mid-range laptop and never bel
 
 - **No third-party code at runtime.** Scripts, fonts and images are local. A CDN may be used once to fetch a file, which is then kept under `lib/`.
 - **Service worker:** caches only its own origin, must never block the game if registration fails, and its cache name is bumped when cached files change so players do not keep a stale game.
-- **Browser storage** (future settings and scores): wrapped in try/catch, parsed once with a safe default, stored under one versioned key prefix. Never build HTML from text a player typed.
+- **Browser storage** (settings today in `src/settings.js`, scores later): wrapped in try/catch, parsed once with a safe default, stored under one versioned key prefix. Never build HTML from text a player typed.
 - **Accessibility and comfort:** keyboard remapping is on the roadmap; a screen-shake / flash reduction option is proposed but not yet listed there. Keep colour from being the only signal (indicators also click, gear state is shown as text).
 - **Compatibility:** target current Edge, Chrome and Firefox with WebGL. Detect missing WebGL and show a plain message.
 - **Asset licensing:** anything imported (models, sounds, fonts) has its licence recorded next to it.

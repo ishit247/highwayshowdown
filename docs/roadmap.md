@@ -28,12 +28,12 @@
 ## Phase 1 — Stabilise (P1)
 | Task | Effort | Model | Status | Notes |
 |---|---|---|---|---|
-| Full play-test of all 5 cars: every key, crash, restart, menu round-trip | S | You (by hand) | Todo | Everything so far was tested by script, not by hand |
-| Fix whatever the play-test finds | S–M | STD (HIGH if it touches physics or collisions) | Todo | |
-| Performance check on a weaker PC (frame rate, lots of traffic) | S | STD | Todo | Cars are now much more detailed |
+| Full play-test of all 5 cars: every key, crash, restart, menu round-trip | S | You (by hand) | Done | Played by hand on 2026-11-14, no problems found. Nothing left to fix from it |
+| Fix whatever the play-test finds | S–M | STD (HIGH if it touches physics or collisions) | Done | The play-test found nothing |
+| Performance check on a weaker PC (frame rate, lots of traffic) | S | STD | Measured | 2026-11-14, headless Edge, software GL (frame ms is relative only), 1280×720, Hypercar player, cars held in view. Per car: about 125 meshes, 80 draw calls after culling, 4,200 triangles, 55 geometries, none shared. Draw calls: 0 traffic 1,100 · 15 (the game's cap) 1,870 · 30 3,270 · 60 6,060. A weak PC is limited by draw calls, so the cap of 15 is already heavy. Not measured: a real GPU, a real weak PC. Next: share geometry per style and merge each car's static parts (architecture.md section 5, rules 2 and 4); then re-measure with the same method |
 | `git init` and a first commit | S | STD | Done | Project committed by you after the Three.js upgrade; no remote |
 | **Upgrade Three.js from r128 (2021) to the current stable release** | M–L | **HIGH** | Done | 0.187.0 (r187) in `lib/three/`, done 2026-11-14. Looks identical, all scripted checks pass. The game now needs the local server: `car-game.html` no longer opens by double-click. Steps under "Library upgrade plan" |
-| Remember settings (last car, gearbox mode, camera) in the browser | S | STD | Todo | Small, feels polished |
+| Remember settings (last car, gearbox mode, camera) in the browser | S | STD | Done 2026-11-14 | `src/settings.js`. Open: also keep the look-around view (free orbit angle/zoom; first person and chase would need the view to stop springing back plus a re-centre key) |
 | Settings screen: volume, quality, key list | M | STD | Todo | Needed before sharing with others |
 
 ## Phase 2 — Look and atmosphere (P1/P2)
