@@ -219,11 +219,11 @@ export function buildCar(sp, color, opt){
     for (const sx of [-1,1]){
       const y = clear+bh*.52, zl = noseZ(y)+bv;
       const fend = add(new THREE.SphereGeometry(1,18,12), body, sx*.6, yT-nd+.02, zl-.32); fend.scale.set(.3,.13,.5);
-      const lamp = add(new THREE.SphereGeometry(1,18,12), M(0xf4f4f0), sx*.6, y+.07, zl-.04); lamp.scale.set(.15,.15,.08);
+      const lamp = add(new THREE.SphereGeometry(1,18,12), lampW, sx*.6, y+.07, zl-.04); lamp.scale.set(.15,.15,.08);
       add(box(.14,.05,.03), M(0xff8c1a), sx*.55, clear+bh*.2, zF-.005);                  // amber indicator
     }
     add(box(W*.9,.045,.05), black, 0, clear+.1, zF-.005);                               // front valance
-    add(box(W*.88,.1,.05), M(0x8a1a1a), 0, clear+bh*.42, zR-.012);                      // red rear band
+    add(box(W*.88,.1,.05), lampR, 0, clear+bh*.42, zR-.012);                            // red rear band (unlit, so it shows at night)
     add(box(W*.9,.05,.05), black, 0, clear+.1, zR-.01);
     // whale-tail wing: big raised duck tail with grille
     const wz0 = -L/2+.38;
