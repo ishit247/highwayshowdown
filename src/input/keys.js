@@ -25,6 +25,7 @@ export function listenForInput(){
     if (k==='b') S.hoodOpen = !S.hoodOpen;
     if (k==='l') S.lights = (S.lights+1)%3;                 // off -> wide -> focus -> off
     if (k==='k') S.sky = S.sky==='day' ? 'night' : S.sky==='night' ? 'auto' : 'day';   // day -> night -> automatic cycle -> day
+    if (k==='j') S.weather = S.weather==='clear' ? 'rain' : S.weather==='rain' ? 'fog' : 'clear';   // clear -> rain -> fog -> clear
     if (k==='v'){ S.cam = S.cam==='fp' ? 'chase' : S.cam==='chase' ? 'free' : 'fp'; settings.cam = S.cam; saveSettings(); if (S.cam==='free'){ free.rel=0; free.pitch=.35; free.dist=9; } }
     if (k==='n') S.ac = !S.ac;
     if (k==='z'){ S.sigL = !S.sigL; if (S.sigL) S.sigR = false; S.sigSteer = 0; }       // left indicator

@@ -99,6 +99,35 @@ async function night(p) {
            detail: `day ${day.toString(16)}, night ${dark.toString(16)}, auto noon ${noon.toString(16)}, auto midnight ${midnight.toString(16)}, back ${back.toString(16)}` };
 }
 
+async function weather(p) {
+  await start(p, COMPACT_HATCH);
+  const view = () => p.eval('[__g.scene.fog.far, __g.scene.fog.color.getHex()]');
+  const [clearFar, clearColor] = await view();
+  await p.press('j'); await p.run(900);
+  const [rainFar, rainColor] = await view(), rainState = await S(p, 'S.weather');
+  await p.press('j'); await p.run(900);
+  const [fogFar] = await view(), fogState = await S(p, 'S.weather');
+  await p.press('j'); await p.run(900);
+  const [backFar] = await view();
+  return { name: 'J cycles clear, rain, fog, clear (rain greys and shortens the view, fog shortens it most)',
+           ok: rainState === 'rain' && fogState === 'fog' && rainFar < clearFar && fogFar < rainFar && rainColor !== clearColor && Math.abs(backFar - clearFar) < 3,   // the sky stops updating once it is within .4% of its target
+           detail: `fog far: clear ${clearFar|0}, rain ${rainFar|0}, fog ${fogFar|0}, back ${backFar|0}` };
+}
+
+async function wetBraking(p) {
+  const stop = async rain => {
+    await start(p, COMPACT_HATCH);
+    await p.eval(`(S => { S.weather = '${rain ? 'rain' : 'clear'}'; S.rain = ${rain}; S.v = 30; S.s0 = S.s; S.throttle = 0; })(__g.S)`);
+    await p.down('s'); await p.run(48);                    // .75 s of braking from 30 m/s, still well above standstill
+    const d = await S(p, 'S.s - S.s0'), v = await S(p, 'S.v');
+    await p.up('s'); return { d, v };
+  };
+  const dry = await stop(0), wet = await stop(1);
+  return { name: 'rain: braking from 30 m/s sheds less speed on a wet road than a dry one',
+           ok: wet.v > dry.v + 1 && wet.d > dry.d,
+           detail: `after .75 s: dry ${dry.v.toFixed(1)} m/s in ${dry.d.toFixed(1)} m, wet ${wet.v.toFixed(1)} m/s in ${wet.d.toFixed(1)} m` };
+}
+
 // A long drive that rams traffic (an autopilot steers at the nearest car ahead), then weaves into both rails.
 // Health is topped up every frame so the run never ends.
 async function contacts(p) {
@@ -177,7 +206,7 @@ async function settingsScreen(p) {
 
 export async function runChecks(p) {
   const results = [];
-  for (const check of [offlineCache, flames, neutral, camera, brakeLights, reverse, toggles, night, contacts, settingsScreen]) results.push(...[await check(p)].flat());
+  for (const check of [offlineCache, flames, neutral, camera, brakeLights, reverse, toggles, night, weather, wetBraking, contacts, settingsScreen]) results.push(...[await check(p)].flat());
   results.push({ name: 'no errors in the console', ok: p.errors.length === 0, detail: p.errors.length ? p.errors.slice(0, 3).join(' | ') : 'clean' });
   return results;
 }

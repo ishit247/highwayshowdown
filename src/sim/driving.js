@@ -8,6 +8,7 @@ import { crash } from './collisions.js';
 import { feedback } from './feedback.js';
 
 const REV_MAX = 6, REV_ENGAGE_V = .3;       // reverse top speed (m/s); below this speed the pedals may switch direction
+const WET_GRIP_LOSS = .3;                   // share of braking and cornering grip lost in full rain (S.rain = 1)
 
 // live: the run was going at the start of the frame; dmgf: damage share at the start of the frame
 export function drive(dt, live, dmgf){
@@ -35,7 +36,8 @@ export function drive(dt, live, dmgf){
   }
   a -= .12 + .0008*v*v;
   if (!S.throttle && !S.neutral) a -= .5;                                          // no engine braking in neutral
-  if (S.brake) a -= 10*(car.grip/10)*(1-.35*dmgf);
+  const wetGrip = 1 - WET_GRIP_LOSS*S.rain;           // tyres on a wet road: longer stops, earlier understeer
+  if (S.brake) a -= 10*(car.grip/10)*(1-.35*dmgf)*wetGrip;
   if (S.hand) a -= 5;
   if (S.over) a -= 14;
   if (v>vmax && S.throttle) a -= .3*(v-vmax);
@@ -44,7 +46,7 @@ export function drive(dt, live, dmgf){
   // steering: kinematic bicycle in road coordinates with a grip limit (understeer)
   const L = 2.7, delta = S.steer*.32/(1+Math.pow(v/12,1.5));
   let yaw = -v*Math.tan(delta)/L;
-  let aMax = car.grip*(S.hand?.55:1);
+  let aMax = car.grip*(S.hand?.55:1)*wetGrip;
   const aLat = v*Math.abs(yaw); S.slip = 0;
   if (aLat>aMax){ yaw *= aMax/aLat; S.slip = Math.min(1,(aLat-aMax)/aMax+.35); }
   if (S.hand && v>8 && Math.abs(S.steer)>.1) S.slip = Math.max(S.slip,.6);

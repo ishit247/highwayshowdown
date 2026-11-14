@@ -16,27 +16,33 @@ const skyCtx = skyCanvas.getContext('2d');
 const skyTex = THREE.canvasTexture(skyCanvas);
 scene.background = skyTex;
 const cA = new THREE.Color(), cB = new THREE.Color();
-const mix = (out, day, night, dark) => out.setHex(day).lerp(cB.setHex(night), dark);
-function drawSky(dark){
+const OVERCAST = new THREE.Color(0x98a2aa);              // the grey that rain and fog turn the daytime sky and fog into
+// Day colour greyed by overcast (0..1), then blended towards its night colour by dark.
+const mix = (out, day, night, dark, overcast = 0) => out.setHex(day).lerp(OVERCAST, overcast).lerp(cB.setHex(night), dark);
+function drawSky(dark, overcast){
   const g = skyCtx.createLinearGradient(0,0,0,256);
-  for (const [at, day, night] of SKY) g.addColorStop(at, mix(cA, day, night, dark).getStyle());
+  for (const [at, day, night] of SKY) g.addColorStop(at, mix(cA, day, night, dark, overcast).getStyle());
   skyCtx.fillStyle = g; skyCtx.fillRect(0,0,8,256);
   skyTex.needsUpdate = true;
 }
-drawSky(0);
+drawSky(0, 0);
 const LIGHT = { day:{hemi:.7*Math.PI, sun:.85*Math.PI}, night:{hemi:.04*Math.PI, sun:.015*Math.PI} };
 // Physical light units: a surface lit head-on by intensity PI reflects its full colour, so the sun and sky
 // below are written as PI times the share of full brightness each one gives.
 const hemi = new THREE.HemisphereLight(0xcfe3ff, 0x4a5a35, LIGHT.day.hemi); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff0d0, LIGHT.day.sun); sun.position.set(-60,100,40); scene.add(sun);
 
-// Darkness from 0 (day) to 1 (night): sky, fog and the two scene lights. The unlit road and grass are dimmed by the track (setGroundShade).
-export function applyDark(dark){
-  drawSky(dark);
-  mix(scene.fog.color, FOG, 0x0d1630, dark);
-  scene.fog.far = 760 + (420-760)*dark;
-  hemi.intensity = LIGHT.day.hemi + (LIGHT.night.hemi-LIGHT.day.hemi)*dark;
-  sun.intensity = LIGHT.day.sun + (LIGHT.night.sun-LIGHT.day.sun)*dark;
+// Darkness (0 day .. 1 night), rain and mist (each 0..1): sky, fog and the two scene lights. The unlit road and grass are
+// dimmed by the track (setGroundShade). Rain greys and shortens the view; mist closes it in to a few hundred metres at most.
+export function applyAtmosphere(dark, rain, mist){
+  const overcast = Math.max(rain*.8, mist);
+  drawSky(dark, overcast);
+  mix(scene.fog.color, FOG, 0x0d1630, dark, overcast);
+  const far = (760 + (420-760)*dark) * (1 - .55*rain);
+  scene.fog.far = far + (150-far)*mist;
+  scene.fog.near = 40 * (1 - .5*rain) * (1 - .9*mist);
+  hemi.intensity = (LIGHT.day.hemi + (LIGHT.night.hemi-LIGHT.day.hemi)*dark) * (1 - .3*overcast);
+  sun.intensity = (LIGHT.day.sun + (LIGHT.night.sun-LIGHT.day.sun)*dark) * (1 - .75*overcast);
   mix(sun.color, 0xfff0d0, 0x8fa8ff, dark);
 }
 

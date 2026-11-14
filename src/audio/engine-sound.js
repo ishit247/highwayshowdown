@@ -38,7 +38,7 @@ export const AU = {
     mix.connect(sh); sh.connect(this.elp); this.elp.connect(this.eg); this.eg.connect(master);
     this.lfo=ctx.createOscillator(); this.lfo.frequency.value=17; const lg=this.lg=ctx.createGain(); lg.gain.value=.03; this.lfo.connect(lg); lg.connect(this.eg.gain); this.lfo.start();
     [this.eA,this.eB,this.eC].forEach(o=>o.start());
-    this.screech=noise('bandpass',1300,3); this.wind=noise('lowpass',600,.7); this.road=noise('lowpass',180,.7); this.scrape=noise('bandpass',2300,1.4); this.ac=noise('bandpass',1100,.5);
+    this.screech=noise('bandpass',1300,3); this.wind=noise('lowpass',600,.7); this.road=noise('lowpass',180,.7); this.scrape=noise('bandpass',2300,1.4); this.ac=noise('bandpass',1100,.5); this.rain=noise('bandpass',4200,.35);
     const h1=ctx.createOscillator(), h2=ctx.createOscillator(); h1.type=h2.type='square'; h1.frequency.value=415; h2.frequency.value=523;
     this.horn=ctx.createGain(); this.horn.gain.value=0; const hl=ctx.createBiquadFilter(); hl.type='lowpass'; hl.frequency.value=1200;
     h1.connect(hl); h2.connect(hl); hl.connect(this.horn); this.horn.connect(master); h1.start(); h2.start();
@@ -63,7 +63,8 @@ export const AU = {
     this.screech.g.gain.setTargetAtTime(sl*.08*Math.min(1,S.v/10),t,.05);
     this.screech.fl.frequency.setTargetAtTime(1100+S.v*8,t,.1);
     this.wind.g.gain.setTargetAtTime(Math.pow(S.v/90,1.6)*.22,t,.1);
-    this.road.g.gain.setTargetAtTime(Math.min(1,S.v/40)*.14,t,.1);
+    this.road.g.gain.setTargetAtTime(Math.min(1,S.v/40)*.14*(1+.7*S.rain),t,.1);      // tyres hiss on a wet road
+    this.rain.g.gain.setTargetAtTime(S.started ? S.rain*.07 : 0,t,.3);                // drumming on the roof; silent in the menu
     this.scrape.g.gain.setTargetAtTime(S.scrapeT>0 ? .12 : 0,t,.03);
     this.ac.g.gain.setTargetAtTime(S.ac ? .05 : 0,t,.2);
     this.horn.gain.setTargetAtTime(keys['h'] ? .07 : 0,t,.015);

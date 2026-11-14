@@ -40,7 +40,7 @@ Decided (do not re-ask):
 - Controls: W/S gas/brake (S at a standstill reverses), A/D steer, Space handbrake, T automatic/manual gears,
   Q/E shift (manual only), X neutral, Z/C left/right indicator, L headlights
   (wide, focus, off), B bonnet, V camera (cockpit, chase, free orbit with the left
-  mouse button), K day / night / automatic cycle, N air conditioning, H horn, R restart, M menu. Keep this list and the
+  mouse button), K day / night / automatic cycle, J clear / rain / fog, N air conditioning, H horn, R restart, M menu. Keep this list and the
   start-menu help text in step.
 
 Proposed, not confirmed: keep code-built cars (stylised) rather than moving to glTF

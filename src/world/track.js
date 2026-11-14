@@ -49,10 +49,46 @@ function makeRibbon(mat){
 const mk = (tex)=>new THREE.MeshBasicMaterial({map:tex, side:THREE.DoubleSide});
 const rbRoad = makeRibbon(mk(roadTex)), rbGL = makeRibbon(mk(grassTex)), rbGR = makeRibbon(mk(grassTex)),
       rbRL = makeRibbon(mk(railTex)), rbRR = makeRibbon(mk(railTex));
+
+/* wet-road sheen: a second road ribbon, added on top. Reflections are strongest at a grazing angle, so its vertex
+   colour rises with distance ahead of the car; the texture breaks it into streaks and puddles. */
+const sheenTex = makeTex(128,256,(x,w,h)=>{
+  x.fillStyle='#000'; x.fillRect(0,0,w,h);
+  for (let i=0;i<70;i++){
+    const cx=Math.random()*w, cy=Math.random()*h, rw=3+Math.random()*14, rh=10+Math.random()*50;
+    const g=x.createRadialGradient(cx,cy,0,cx,cy,rh); g.addColorStop(0,`rgba(255,255,255,${.25+Math.random()*.5})`); g.addColorStop(1,'rgba(255,255,255,0)');
+    x.save(); x.translate(cx,cy); x.scale(rw/rh,1); x.translate(-cx,-cy); x.fillStyle=g; x.fillRect(cx-rh,cy-rh,rh*2,rh*2); x.restore();
+  }
+}, false);
+const sheenMat = new THREE.MeshBasicMaterial({map:sheenTex, vertexColors:true, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, side:THREE.DoubleSide});
+const rbSheen = makeRibbon(sheenMat);
+rbSheen.m.visible = false;
+{
+  const col = new Float32Array((N+1)*6);
+  for (let k=0;k<=N;k++){
+    const f = Math.min(1,Math.max(.1,(k-8)/40)) * Math.min(1,Math.max(0,(120-k)/35));
+    col.fill(f, k*6, k*6+6);
+  }
+  rbSheen.g.setAttribute('color', new THREE.BufferAttribute(col,3));
+}
+
 // These materials ignore lights, so darkness (0 day .. 1 night) is a colour multiplier on their textures
-// (linear values: a dim, blue moonlit ground).
-export function setGroundShade(dark){
-  for (const rb of [rbRoad,rbGL,rbGR,rbRL,rbRR]) rb.m.material.color.setRGB(1+(.018-1)*dark, 1+(.023-1)*dark, 1+(.056-1)*dark);
+// (linear values: a dim, blue moonlit ground). Rain darkens the road (wet) more than the grass.
+export function setGroundShade(dark, rain, mist){
+  const overcast = Math.max(rain*.8, mist), grass = 1 - .25*overcast;
+  for (const rb of [rbRoad,rbGL,rbGR,rbRL,rbRR]){
+    const k = (rb === rbRoad ? 1 - .45*rain : grass) * (rb === rbRoad ? 1 - .15*mist : 1);
+    rb.m.material.color.setRGB((1+(.018-1)*dark)*k, (1+(.023-1)*dark)*k, (1+(.056-1)*dark)*k);
+  }
+}
+// The sheen reflects the horizon sky; at night, with the headlights on, it also reflects their warm light down the beam.
+// Called every frame because the L key changes it without any change in the weather.
+const HEADLIGHT_GLINT = new THREE.Color(0xffe6a8);
+export function setSheen(dark, rain, mist, headlightsOn){
+  rbSheen.m.visible = rain > .01;
+  sheenMat.color.copy(scene.fog.color);
+  if (headlightsOn){ const k = .55*dark; sheenMat.color.r += HEADLIGHT_GLINT.r*k; sheenMat.color.g += HEADLIGHT_GLINT.g*k; sheenMat.color.b += HEADLIGHT_GLINT.b*k; }
+  sheenMat.color.multiplyScalar(.9*rain*(1-mist));
 }
 function setRow(rb,k,a,b,c,d,e,f,u0,u1,v){
   const p=rb.pos; let o=k*6; p[o]=a;p[o+1]=b;p[o+2]=c;p[o+3]=d;p[o+4]=e;p[o+5]=f;
@@ -64,13 +100,14 @@ export function updateTrack(){
     const i=i0+k, H=TH[i], rx=-Math.cos(H), rz=Math.sin(H), x=TX[i], y=TY[i], z=TZ[i], v=i/3;
     const ext = Math.min(420, 0.8/(Math.abs(kappa(i*DS))+1e-4));
     setRow(rbRoad,k, x-rx*BARRIER,y,z-rz*BARRIER, x+rx*BARRIER,y,z+rz*BARRIER, 0,1,v);
+    setRow(rbSheen,k, x-rx*HALF,y+.02,z-rz*HALF, x+rx*HALF,y+.02,z+rz*HALF, 0,1,v);
     setRow(rbGL,k, x-rx*ext,y-.06,z-rz*ext, x-rx*BARRIER,y-.06,z-rz*BARRIER, -ext/14,-BARRIER/14, i*DS/14);
     setRow(rbGR,k, x+rx*BARRIER,y-.06,z+rz*BARRIER, x+rx*ext,y-.06,z+rz*ext, BARRIER/14,ext/14, i*DS/14);
     const rl = BARRIER-.45;
     setRow(rbRL,k, x-rx*rl,y,z-rz*rl, x-rx*rl,y+.8,z-rz*rl, 0,1,i*DS/4);
     setRow(rbRR,k, x+rx*rl,y,z+rz*rl, x+rx*rl,y+.8,z+rz*rl, 0,1,i*DS/4);
   }
-  for (const rb of [rbRoad,rbGL,rbGR,rbRL,rbRR]){ rb.g.attributes.position.needsUpdate=true; rb.g.attributes.uv.needsUpdate=true; }
+  for (const rb of [rbRoad,rbSheen,rbGL,rbGR,rbRL,rbRR]){ rb.g.attributes.position.needsUpdate=true; rb.g.attributes.uv.needsUpdate=true; }
 }
 
 /* scenery: trees + street lamps, recycled by index */

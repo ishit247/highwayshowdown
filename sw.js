@@ -1,11 +1,11 @@
 /* Highway Showdown - service worker: makes the game work offline once it has been opened. */
-const CACHE = 'highway-dash-v10';   // bumped: automatic day/night cycle (scene, frame, track, keys, state, help text)
+const CACHE = 'highway-dash-v12';   // bumped: weather (rain.js new; scene, frame, track, keys, state, help text, rain sound, night sheen)
 const ASSETS = ['./car-game.html', './lib/three/three.module.js', './lib/three/three.core.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
   './src/main.js', './src/three.js', './src/config.js', './src/state.js', './src/game.js',
   './src/cars/specs.js', './src/cars/shapes.js', './src/cars/build-car.js', './src/cars/engine-bay.js',
   './src/world/road.js', './src/world/track.js',
   './src/sim/step.js', './src/sim/driving.js', './src/sim/gearbox.js', './src/sim/collisions.js', './src/sim/traffic.js', './src/sim/feedback.js',
-  './src/render/scene.js', './src/render/frame.js', './src/render/headlights.js', './src/render/effects.js',
+  './src/render/scene.js', './src/render/frame.js', './src/render/headlights.js', './src/render/rain.js', './src/render/effects.js',
   './src/ui/hud.js', './src/ui/dashboard.js', './src/ui/menu.js',
   './src/audio/engine-sound.js', './src/audio/effects.js',
   './src/input/keys.js', './src/settings.js'];

@@ -1,8 +1,9 @@
 // Per-frame scene update: the player's and traffic cars' meshes (pose, wheels, bonnet, paint, flames,
 // indicators), the track around the car, the camera modes, and the render itself.
 import * as THREE from '../three.js';
-import { renderer, scene, camera, disposeObj, applyDark } from './scene.js';
-import { updateTrack, placeScenery, setGroundShade } from '../world/track.js';
+import { renderer, scene, camera, disposeObj, applyAtmosphere } from './scene.js';
+import { updateRain } from './rain.js';
+import { updateTrack, placeScenery, setGroundShade, setSheen } from '../world/track.js';
 import { buildCar, glowK } from '../cars/build-car.js';
 import { updateParts, updateFlames } from './effects.js';
 import { updateHeadlights } from './headlights.js';
@@ -45,13 +46,19 @@ function spinWheels(mesh, v, steer, dt){
   for (const w of u.wheels){ w.w.rotation.x = u.spin; if (w.front) w.o.rotation.y = -steer; }
 }
 const DAY_LENGTH = 240;                                // seconds for one full day in the automatic cycle (starts at noon)
-let darkShown = 0;
+let darkShown = 0, rainShown = 0, mistShown = 0;
 function updateSky(dt){
   if (S.sky === 'auto') S.clock = (S.clock + dt/DAY_LENGTH) % 1;
   const noonToMidnight = .5 - .5*Math.cos(S.clock*2*Math.PI);                  // 0 at noon, 1 at midnight
   const target = S.sky === 'night' ? 1 : S.sky === 'day' ? 0 : Math.min(1, Math.max(0, (noonToMidnight-.25)*2));   // long days and nights, short dusk
   S.dark += (target - S.dark) * Math.min(1, dt*1.5);                           // K eases between day and night instead of cutting
-  if (Math.abs(S.dark - darkShown) > .004){ darkShown = S.dark; applyDark(darkShown); setGroundShade(darkShown); }
+  S.rain += ((S.weather === 'rain' ? 1 : 0) - S.rain) * Math.min(1, dt*.6);                   // weather fades in over a few seconds
+  S.mist += ((S.weather === 'fog' ? 1 : 0) - S.mist) * Math.min(1, dt*.6);
+  if (Math.abs(S.dark - darkShown) + Math.abs(S.rain - rainShown) + Math.abs(S.mist - mistShown) > .004){
+    darkShown = S.dark; rainShown = S.rain; mistShown = S.mist;
+    applyAtmosphere(darkShown, rainShown, mistShown); setGroundShade(darkShown, rainShown, mistShown);
+  }
+  setSheen(S.dark, S.rain, S.mist, S.started && S.lights > 0);
 }
 export function render3D(dt){
   updateSky(dt);
@@ -96,5 +103,6 @@ export function render3D(dt){
     camera.position.set(camPos.x+(Math.random()-.5)*sh, camPos.y+(Math.random()-.5)*sh, camPos.z);
     camera.lookAt(W.x+W.fx*8, W.y+1.0+sl*8, W.z+W.fz*8);
   }
+  updateRain(dt, S.rain, S.dark, camera.position.x, camera.position.y, camera.position.z);
   renderer.render(scene, camera);
 }

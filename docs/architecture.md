@@ -89,6 +89,7 @@ src/
   render/scene.js        renderer, scene, camera, lights, sky, disposeObj
   render/frame.js        per-frame scene update: car meshes, indicators, camera modes, render
   render/headlights.js   beams
+  render/rain.js         falling rain streaks in a box around the camera
   render/effects.js      particles, flames
   ui/hud.js  ui/dashboard.js  ui/menu.js
   audio/engine-sound.js  the audio context and the continuous sounds;  audio/effects.js  one-shot sounds
