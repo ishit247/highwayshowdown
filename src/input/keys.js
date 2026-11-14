@@ -11,7 +11,7 @@ export function listenForInput(){
 
   addEventListener('keydown', e=>{
     const k = e.key.toLowerCase();
-    if (menuOpen() && e.target.matches('input, button, summary')) return;   // the settings controls use the keys themselves
+    if (menuOpen() && e.target instanceof Element && e.target.matches('input, button, summary')) return;   // the settings controls use the keys themselves
     if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
     if (menuOpen()){
       if (k==='arrowleft') select(sel-1);
@@ -24,7 +24,7 @@ export function listenForInput(){
     keys[k]=true;
     if (k==='b') S.hoodOpen = !S.hoodOpen;
     if (k==='l') S.lights = (S.lights+1)%3;                 // off -> wide -> focus -> off
-    if (k==='k') S.night = !S.night;                        // day <-> night
+    if (k==='k') S.sky = S.sky==='day' ? 'night' : S.sky==='night' ? 'auto' : 'day';   // day -> night -> automatic cycle -> day
     if (k==='v'){ S.cam = S.cam==='fp' ? 'chase' : S.cam==='chase' ? 'free' : 'fp'; settings.cam = S.cam; saveSettings(); if (S.cam==='free'){ free.rel=0; free.pitch=.35; free.dist=9; } }
     if (k==='n') S.ac = !S.ac;
     if (k==='z'){ S.sigL = !S.sigL; if (S.sigL) S.sigR = false; S.sigSteer = 0; }       // left indicator

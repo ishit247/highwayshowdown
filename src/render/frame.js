@@ -1,7 +1,7 @@
 // Per-frame scene update: the player's and traffic cars' meshes (pose, wheels, bonnet, paint, flames,
 // indicators), the track around the car, the camera modes, and the render itself.
 import * as THREE from '../three.js';
-import { renderer, scene, camera, disposeObj, applyNight } from './scene.js';
+import { renderer, scene, camera, disposeObj, applyDark } from './scene.js';
 import { updateTrack, placeScenery, setGroundShade } from '../world/track.js';
 import { buildCar, glowK } from '../cars/build-car.js';
 import { updateParts, updateFlames } from './effects.js';
@@ -44,9 +44,17 @@ function spinWheels(mesh, v, steer, dt){
   u.spin += step;
   for (const w of u.wheels){ w.w.rotation.x = u.spin; if (w.front) w.o.rotation.y = -steer; }
 }
-let nightShown = false;
+const DAY_LENGTH = 240;                                // seconds for one full day in the automatic cycle (starts at noon)
+let darkShown = 0;
+function updateSky(dt){
+  if (S.sky === 'auto') S.clock = (S.clock + dt/DAY_LENGTH) % 1;
+  const noonToMidnight = .5 - .5*Math.cos(S.clock*2*Math.PI);                  // 0 at noon, 1 at midnight
+  const target = S.sky === 'night' ? 1 : S.sky === 'day' ? 0 : Math.min(1, Math.max(0, (noonToMidnight-.25)*2));   // long days and nights, short dusk
+  S.dark += (target - S.dark) * Math.min(1, dt*1.5);                           // K eases between day and night instead of cutting
+  if (Math.abs(S.dark - darkShown) > .004){ darkShown = S.dark; applyDark(darkShown); setGroundShade(darkShown); }
+}
 export function render3D(dt){
-  if (S.night !== nightShown){ nightShown = S.night; applyNight(nightShown); setGroundShade(nightShown); }
+  updateSky(dt);
   const p = placeOn(playerMesh, S.s, S.d, S.psi);
   const Hc = p.H + S.psi, rx=-Math.cos(p.H), rz=Math.sin(p.H);
   W.x = p.x+rx*S.d; W.y = p.y; W.z = p.z+rz*S.d; W.H = Hc; W.fx = Math.sin(Hc); W.fz = Math.cos(Hc);

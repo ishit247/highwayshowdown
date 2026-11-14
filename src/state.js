@@ -8,7 +8,7 @@ function freshState() {
     gear:0, rpm:900, shiftT:0, health:100, pullBias:0, cracks:[],
     dist:0, overtakes:0, score:0, flash:0, shake:0, needle:0,
     ac:false, auto:true, neutral:false, rev:false, shAnim:0, lastGear:0,
-    popQ:[], flameI:0, sigL:false, sigR:false, sigSteer:0, lights:0, night:false, hoodA:0, hoodOpen:false, cam:'fp', over:false, started:false, scrapeT:0, slip:0, cool:0, t:0, hint:12
+    popQ:[], flameI:0, sigL:false, sigR:false, sigSteer:0, lights:0, sky:'day', dark:0, clock:0, hoodA:0, hoodOpen:false, cam:'fp', over:false, started:false, scrapeT:0, slip:0, cool:0, t:0, hint:12
   };
 }
 

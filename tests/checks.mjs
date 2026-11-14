@@ -86,12 +86,17 @@ async function night(p) {
   await start(p, COMPACT_HATCH);
   const fog = () => p.eval('__g.scene.fog.color.getHex()');
   const day = await fog();
-  await p.press('k'); await p.run(2);
-  const dark = await fog(), on = await S(p, 'S.night');
-  await p.press('k'); await p.run(2);
+  await p.press('k'); await p.run(600);
+  const dark = await fog(), on = await S(p, 'S.sky');
+  await p.press('k'); await p.run(600);                     // automatic cycle, starts at noon
+  const noon = await fog(), auto = await S(p, 'S.sky');
+  await p.eval('__g.S.clock = .5'); await p.run(600);            // jump the clock to midnight
+  const midnight = await fog();
+  await p.press('k'); await p.run(600);
   const back = await fog();
-  return { name: 'K switches night on (dark fog) and back to day', ok: on && dark !== day && back === day,
-           detail: `day ${day.toString(16)}, night ${dark.toString(16)}, back ${back.toString(16)}` };
+  return { name: 'K cycles day, night, automatic (dark at midnight), day',
+           ok: on === 'night' && dark !== day && auto === 'auto' && noon === day && midnight === dark && back === day,
+           detail: `day ${day.toString(16)}, night ${dark.toString(16)}, auto noon ${noon.toString(16)}, auto midnight ${midnight.toString(16)}, back ${back.toString(16)}` };
 }
 
 // A long drive that rams traffic (an autopilot steers at the nearest car ahead), then weaves into both rails.

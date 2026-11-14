@@ -49,9 +49,10 @@ function makeRibbon(mat){
 const mk = (tex)=>new THREE.MeshBasicMaterial({map:tex, side:THREE.DoubleSide});
 const rbRoad = makeRibbon(mk(roadTex)), rbGL = makeRibbon(mk(grassTex)), rbGR = makeRibbon(mk(grassTex)),
       rbRL = makeRibbon(mk(railTex)), rbRR = makeRibbon(mk(railTex));
-// These materials ignore lights, so night is a colour multiplier on their textures (linear values: a dim, blue moonlit ground).
-export function setGroundShade(night){
-  for (const rb of [rbRoad,rbGL,rbGR,rbRL,rbRR]) rb.m.material.color.setRGB(night?.018:1, night?.023:1, night?.056:1);
+// These materials ignore lights, so darkness (0 day .. 1 night) is a colour multiplier on their textures
+// (linear values: a dim, blue moonlit ground).
+export function setGroundShade(dark){
+  for (const rb of [rbRoad,rbGL,rbGR,rbRL,rbRR]) rb.m.material.color.setRGB(1+(.018-1)*dark, 1+(.023-1)*dark, 1+(.056-1)*dark);
 }
 function setRow(rb,k,a,b,c,d,e,f,u0,u1,v){
   const p=rb.pos; let o=k*6; p[o]=a;p[o+1]=b;p[o+2]=c;p[o+3]=d;p[o+4]=e;p[o+5]=f;
