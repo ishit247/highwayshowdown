@@ -1,6 +1,6 @@
 {
-  "name": "Highway Dash 3D",
-  "short_name": "Highway Dash",
+  "name": "Highway Showdown",
+  "short_name": "Highway Showdown",
   "description": "3D highway driving game with five cars, damage, manual gears, headlights and exhaust flames.",
   "start_url": "./car-game.html",
   "scope": "./",

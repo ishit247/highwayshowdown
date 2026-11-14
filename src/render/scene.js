@@ -1,5 +1,6 @@
 // Renderer, scene, camera, sky and the two scene lights.
 import * as THREE from '../three.js';
+import { settings } from '../settings.js';
 
 const glc = document.getElementById('gl');
 export const renderer = new THREE.WebGLRenderer({canvas:glc, antialias:true});
@@ -34,8 +35,8 @@ export function applyNight(night){
   sun.color.setHex(night ? 0x8fa8ff : 0xfff0d0);
 }
 
-function resize() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+export function resize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, settings.quality === 'low' ? 1 : 2);
   renderer.setPixelRatio(dpr); renderer.setSize(innerWidth, innerHeight, false);
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
 }

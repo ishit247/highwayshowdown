@@ -1,4 +1,4 @@
-# Highway Dash 3D
+# Highway Showdown
 
 A browser driving game: five cars (Compact Hatch, Family Sedan, Muscle GT, Sports Coupe,
 Hypercar), traffic, damage, manual/automatic gears, headlights, indicators, exhaust

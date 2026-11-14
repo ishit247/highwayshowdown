@@ -154,9 +154,25 @@ async function offlineCache(p) {
            detail: `${cacheName}: ${assets.length - missing.length}/${assets.length} files` + (missing.length ? ', missing ' + missing.join(' ') : '') };
 }
 
+// The settings controls in the start menu: they apply at once and are kept in browser storage.
+async function settingsScreen(p) {
+  if (await p.eval('document.getElementById("menu").style.display === "none"')) await p.press('m');
+  const out = await p.eval(`(async () => {
+    const sc = await import('/src/render/scene.js');
+    const v = document.getElementById('volume'); v.value = 40; v.dispatchEvent(new Event('input'));
+    document.querySelector('[data-quality=low]').click();
+    const saved = JSON.parse(localStorage.getItem('highway-dash:v1:settings'));
+    const low = sc.renderer.getPixelRatio();
+    document.querySelector('[data-quality=high]').click();
+    return { vol: saved.volume, q: saved.quality, low, high: sc.renderer.getPixelRatio(), keys: !!document.getElementById('keylist') };
+  })()`);
+  return { name: 'settings: volume and quality apply and are stored, key list present',
+           ok: out.vol === 0.4 && out.q === 'low' && out.low === 1 && out.high >= 1 && out.keys, detail: JSON.stringify(out) };
+}
+
 export async function runChecks(p) {
   const results = [];
-  for (const check of [offlineCache, flames, neutral, camera, brakeLights, reverse, toggles, night, contacts]) results.push(...[await check(p)].flat());
+  for (const check of [offlineCache, flames, neutral, camera, brakeLights, reverse, toggles, night, contacts, settingsScreen]) results.push(...[await check(p)].flat());
   results.push({ name: 'no errors in the console', ok: p.errors.length === 0, detail: p.errors.length ? p.errors.slice(0, 3).join(' | ') : 'clean' });
   return results;
 }

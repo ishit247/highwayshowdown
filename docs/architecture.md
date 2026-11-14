@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-# Highway Dash 3D — System design
+# Highway Showdown — System design
 
 Status of each statement: **Built** (exists in the code today), **Decided** (agreed, in CLAUDE.md),
 **Proposed** (my recommendation, not yet confirmed). Open questions live in the Decisions table of

@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-# Highway Dash 3D — Roadmap
+# Highway Showdown — Roadmap
 
 ## How to read and update this tracker
 - **Effort:** S = under an hour · M = a few hours · L = a day or more.
@@ -34,7 +34,7 @@
 | `git init` and a first commit | S | STD | Done | Project committed by you after the Three.js upgrade; no remote |
 | **Upgrade Three.js from r128 (2021) to the current stable release** | M–L | **HIGH** | Done | 0.187.0 (r187) in `lib/three/`, done 2026-11-14. Looks identical, all scripted checks pass. The game now needs the local server: `car-game.html` no longer opens by double-click. Steps under "Library upgrade plan" |
 | Remember settings (last car, gearbox mode, camera) in the browser | S | STD | Done 2026-11-14 | `src/settings.js`. Open: also keep the look-around view (free orbit angle/zoom; first person and chase would need the view to stop springing back plus a re-centre key) |
-| Settings screen: volume, quality, key list | M | STD | Todo | Needed before sharing with others |
+| Settings screen: volume, quality, key list | M | STD | Done 2026-11-14 | Tried by hand and approved. Volume slider and Low/High quality (pixel-ratio cap 1 or 2) sit in the start menu and are remembered (`src/settings.js`); the key list is a collapsible section there. Not rebindable keys (not asked for). A scripted check covers storage and pixel ratio |
 
 ## Phase 2 — Look and atmosphere (P1/P2)
 | Task | Effort | Model | Status | Notes |

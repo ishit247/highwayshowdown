@@ -11,6 +11,7 @@ export function listenForInput(){
 
   addEventListener('keydown', e=>{
     const k = e.key.toLowerCase();
+    if (menuOpen() && e.target.matches('input, button, summary')) return;   // the settings controls use the keys themselves
     if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
     if (menuOpen()){
       if (k==='arrowleft') select(sel-1);

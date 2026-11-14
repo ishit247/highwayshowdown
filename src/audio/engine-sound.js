@@ -1,6 +1,7 @@
 // The audio context and the continuous sound bed: engine voice per car, tyre screech, wind, road,
 // rail scrape, A/C fan and horn. Everything is synthesised with Web Audio (no audio files).
 import { keys } from '../state.js';
+import { settings } from '../settings.js';
 
 const SND = {   // t: waveforms, g: osc gains, m: frequency multipliers, cb/ck/ct: filter base/rpm/throttle, lf+rough: engine shudder
   hatch :{t:['sawtooth','triangle','sine'],     g:[.30,.25,.35], m:[2,1,3],   cb:500,ck:.40,ct:900,  vol:.85, drive:5,  q:1.0, lf:20, rough:.05},   // light buzzy 4-cyl
@@ -9,13 +10,15 @@ const SND = {   // t: waveforms, g: osc gains, m: frequency multipliers, cb/ck/c
   coupe :{t:['sawtooth','square','triangle'],   g:[.38,.12,.30], m:[2,1,4],   cb:450,ck:.38,ct:1300, vol:.85, drive:8,  q:1.2, lf:15, rough:.03},   // raspy inline-6
   super :{t:['sawtooth','sawtooth','square'],   g:[.35,.25,.12], m:[2,1,6],   cb:650,ck:.50,ct:1700, vol:.9,  drive:10, q:1.4, lf:11, rough:.02},   // high-revving V8 scream
 };
+const MASTER_GAIN = .32;   // the mix level that sounds right at the volume setting 1
 export const AU = {
   ctx:null,
+  setVolume(v){ if (this.master) this.master.gain.value = MASTER_GAIN*v; },   // before init() the setting is read when the context is made
   init(){
     if (this.ctx){ this.ctx.resume(); return; }
     const C = window.AudioContext || window.webkitAudioContext; if(!C) return;
     const ctx = this.ctx = new C();
-    const master = this.master = ctx.createGain(); master.gain.value=.32;
+    const master = this.master = ctx.createGain(); master.gain.value=MASTER_GAIN*settings.volume;
     const mlp = ctx.createBiquadFilter(); mlp.type='lowpass'; mlp.frequency.value=4200;
     const comp = ctx.createDynamicsCompressor(); comp.threshold.value=-24; comp.ratio.value=10; comp.attack.value=.003; comp.release.value=.2;
     master.connect(mlp); mlp.connect(comp); comp.connect(ctx.destination);

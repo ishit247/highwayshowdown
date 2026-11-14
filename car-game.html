@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Highway Dash 3D</title>
+<title>Highway Showdown</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0b1220">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -30,7 +30,14 @@
   .lbl{font-size:10px;color:#7f90a8;margin-top:4px}
   #go{margin-top:20px;padding:12px 34px;font-size:18px;font-weight:700;border:0;border-radius:8px;background:#ffb300;color:#111;cursor:pointer}
   #go:hover{background:#ffc83d}
-  #help{margin-top:16px;font-size:13px;color:#9fb0c8;text-align:center;line-height:1.7;max-width:760px}
+  #settings{margin-top:16px;display:flex;gap:28px;flex-wrap:wrap;justify-content:center;align-items:center;font-size:14px;color:#cfe0ff}
+  #settings input[type=range]{vertical-align:middle;width:140px}
+  #settings output{display:inline-block;min-width:3ch;color:#9fb0c8}
+  .opt{margin-left:6px;padding:4px 12px;border:1px solid #384559;border-radius:6px;background:#222c3b;color:#cfe0ff;cursor:pointer}
+  .opt.on{background:#ffb300;border-color:#ffb300;color:#111}
+  #keylist{margin-top:12px;max-width:760px;font-size:13px;color:#9fb0c8;text-align:center}
+  #keylist summary{cursor:pointer}
+  #help{margin-top:10px;font-size:13px;color:#9fb0c8;text-align:center;line-height:1.7;max-width:760px}
   kbd{background:#222c3b;border-radius:4px;padding:1px 6px;border:1px solid #384559}
 </style>
 </head>
@@ -38,16 +45,22 @@
 <canvas id="gl"></canvas>
 <canvas id="hud"></canvas>
 <div id="menu">
-  <h1>HIGHWAY DASH 3D</h1>
+  <h1>HIGHWAY SHOWDOWN</h1>
   <p class="sub">Pick a car — every car has its own speed, grip and dashboard.</p>
   <div id="cards"></div>
   <button id="go">START ENGINE ▶</button>
+  <div id="settings">
+    <label>Volume <input type="range" id="volume" min="0" max="100" step="5" aria-label="Volume"> <output id="volumeOut"></output></label>
+    <span>Quality <button type="button" class="opt" data-quality="low">Low</button><button type="button" class="opt" data-quality="high">High</button></span>
+  </div>
+  <details id="keylist"><summary>Key list</summary>
   <div id="help">
     <kbd>W</kbd>/<kbd>↑</kbd> gas &nbsp; <kbd>S</kbd>/<kbd>↓</kbd> brake, then reverse &nbsp; <kbd>A</kbd><kbd>D</kbd>/<kbd>←</kbd><kbd>→</kbd> steer &nbsp; <kbd>Space</kbd> handbrake<br>
     <kbd>Z</kbd> left indicator &nbsp; <kbd>C</kbd> right indicator &nbsp; <kbd>L</kbd> headlights (1st press wide, 2nd press focus, 3rd off) &nbsp; <kbd>T</kbd> automatic / manual gears (manual: <kbd>Q</kbd> down, <kbd>E</kbd> up) &nbsp; <kbd>X</kbd> neutral (or <kbd>Q</kbd> from 1st gear; <kbd>E</kbd> to engage)<br>
     <kbd>V</kbd> cockpit / chase / free camera (free camera: hold the left mouse button and drag to orbit 360°, wheel to zoom) &nbsp; <kbd>B</kbd> open / close bonnet &nbsp; <kbd>K</kbd> day / night &nbsp; <kbd>N</kbd> A/C &nbsp; <kbd>H</kbd> horn &nbsp; <kbd>R</kbd> restart &nbsp; <kbd>M</kbd> menu<br>
     Dodge traffic, take the curves, and watch the damage — dents, smoke and a pulling steering wheel are real.
   </div>
+  </details>
 </div>
 
 <script>
@@ -55,7 +68,7 @@
 if (location.protocol === 'file:') addEventListener('DOMContentLoaded', () => {
   const d = document.createElement('div');
   d.style.cssText = 'position:fixed;inset:0;z-index:99;background:#05070d;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font:18px "Segoe UI",system-ui,sans-serif;text-align:center;padding:24px;line-height:1.6';
-  d.innerHTML = '<h2>Highway Dash 3D needs its local server</h2><p>Double-click <b>Play-Highway-Dash.bat</b> in this folder and the game opens in your browser,<br>or run <code>node serve.js</code> and open <code>http://localhost:8123/car-game.html</code></p>';
+  d.innerHTML = '<h2>Highway Showdown needs its local server</h2><p>Double-click <b>Play-Highway-Dash.bat</b> in this folder and the game opens in your browser,<br>or run <code>node serve.js</code> and open <code>http://localhost:8123/car-game.html</code></p>';
   document.body.appendChild(d);
 });
 </script>

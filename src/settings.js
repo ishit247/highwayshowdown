@@ -4,9 +4,10 @@ import { CARS } from './cars/specs.js';
 
 const KEY = 'highway-dash:v1:settings';
 const CAMS = ['fp', 'chase', 'free'];
+const QUALITIES = ['low', 'high'];       // low renders at one pixel per CSS pixel, high up to two
 
 function load() {
-  const d = { car: 0, auto: true, cam: 'fp' };
+  const d = { car: 0, auto: true, cam: 'fp', volume: 1, quality: 'high' };
   let o;
   try { o = JSON.parse(localStorage.getItem(KEY)); }
   catch (e) { return d; }                                  // documented fallback: storage blocked or corrupt
@@ -14,6 +15,8 @@ function load() {
   if (Number.isInteger(o.car) && o.car >= 0 && o.car < CARS.length) d.car = o.car;
   if (typeof o.auto === 'boolean') d.auto = o.auto;
   if (CAMS.includes(o.cam)) d.cam = o.cam;
+  if (typeof o.volume === 'number' && o.volume >= 0 && o.volume <= 1) d.volume = o.volume;
+  if (QUALITIES.includes(o.quality)) d.quality = o.quality;
   return d;
 }
 

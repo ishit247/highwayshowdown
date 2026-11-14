@@ -14,4 +14,4 @@ http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
     res.end(data);
   });
-}).listen(PORT, () => console.log('Highway Dash 3D is running at http://localhost:' + PORT + '/car-game.html   (Ctrl+C to stop)'));
+}).listen(PORT, () => console.log('Highway Showdown is running at http://localhost:' + PORT + '/car-game.html   (Ctrl+C to stop)'));
