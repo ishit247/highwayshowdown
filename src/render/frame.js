@@ -27,13 +27,16 @@ let _sigT = 0;
 export let sigPh = 1;
 const SIG_ON = 0xffb020, SIG_OFF = 0x3a2200;
 function setSig(mesh, l, r, ph){ const u = mesh.userData.ind; if (!u) return; u.L.color.setHex(l&&ph ? SIG_ON : SIG_OFF); u.R.color.setHex(r&&ph ? SIG_ON : SIG_OFF); }
+const TAIL_DIM = 0x8a1010, TAIL_BRAKE = 0xff2a2a;
+function setBrake(mesh, on){ mesh.userData.tail.color.setHex(on ? TAIL_BRAKE : TAIL_DIM); }
 export function updateSignals(dt){
   _sigT += dt; const ph = (Math.floor(_sigT*2.6)%2)===0 ? 1 : 0;
   if ((S.sigL || S.sigR) && S.started && ph!==sigPh) clickSound(ph);
   sigPh = ph;
   cancelIndicatorsAfterTurn();
   setSig(playerMesh, S.sigL, S.sigR, ph);
-  for (const t of traffic){ t.sigT -= dt; setSig(trafficMeshes.get(t), t.sig<0 && t.sigT>0, t.sig>0 && t.sigT>0, ph); }
+  setBrake(playerMesh, S.brake || S.hand);
+  for (const t of traffic){ t.sigT -= dt; const m = trafficMeshes.get(t); setSig(m, t.sig<0 && t.sigT>0, t.sig>0 && t.sigT>0, ph); setBrake(m, t.braking); }
 }
 function spinWheels(mesh, v, steer, dt){
   const u = mesh.userData, step = Math.min(.9, Math.max(0,v)*dt/u.wr);      // capped so fast wheels do not strobe

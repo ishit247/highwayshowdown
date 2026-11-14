@@ -37,6 +37,7 @@ export function updateTraffic(dt, live){
       vt = Math.min(t.v0, lead.v*(.6+.4*Math.max(0,gap-3)/(safe-3)));
       if (gap < 3) vt = Math.min(vt, lead.v*.6);
     }
+    t.braking = vt < t.v - .5;                                  // lights the brake lamps (render/frame.js)
     t.v += Math.max(-9*dt, Math.min(3*dt, vt - t.v));
     if (lead && gap < 1.2){ t.s -= (1.2-gap); t.v = Math.min(t.v, lead.v); }
     t.lcT -= dt;

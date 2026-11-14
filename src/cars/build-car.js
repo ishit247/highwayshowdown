@@ -48,7 +48,7 @@ export function buildCar(sp, color, opt){
   const glass = new THREE.MeshPhongMaterial({color:0x0f1a26, shininess:90, specular:0x0a1018, side:THREE.DoubleSide});
   const black = M(0x0c0c0c), gloss = new THREE.MeshPhongMaterial({color:0x111214, shininess:120, specular:0x555555});
   const chrome = new THREE.MeshPhongMaterial({color:0xd0d4da, shininess:120, specular:0xffffff});
-  const lampW = new THREE.MeshBasicMaterial({color:0xfff6cc}), lampR = new THREE.MeshBasicMaterial({color:0xff1a1a});
+  const lampW = new THREE.MeshBasicMaterial({color:0xfff6cc}), lampR = new THREE.MeshBasicMaterial({color:0x8a1010});   // tail lamp: dim red, bright while braking (render/frame.js)
   const hoodL = L*sp.hf, nd = sp.nd, hinge = L/2-hoodL;
   const yT = clear+bh-.09, yDeck = clear+bh-.03;
   const add = (geo, mat, x,y,z) => { const m = new THREE.Mesh(geo,mat); m.position.set(x,y,z); g.add(m); return m; };
@@ -300,6 +300,6 @@ export function buildCar(sp, color, opt){
     }
   }
 
-  Object.assign(g.userData, {hood, body, flames, ind:{L:indL,R:indR}, wheels, wr, spin:0, baseColor:new THREE.Color(color)});
+  Object.assign(g.userData, {hood, body, flames, ind:{L:indL,R:indR}, tail:lampR, wheels, wr, spin:0, baseColor:new THREE.Color(color)});
   return g;
 }

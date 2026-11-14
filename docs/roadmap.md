@@ -41,7 +41,7 @@
 |---|---|---|---|---|
 | **Night mode** (key K; auto cycle not done) | M | STD | Built, needs a hand play-test | Makes headlights, indicators, brake lights and flames really show. Do after the Three.js upgrade |
 | Adopt Three.js's sRGB colour pipeline and physical light units | M | STD | Done (2026-11-14) | sRGB on, canvas textures tagged, lights retuned so day and night look like before (checked in screenshots); no tone mapping. Needs a hand look |
-| Brake lights and reverse lights that react | S | STD | Todo | Cars still have static tail-lights |
+| Brake lights that react (reverse lights wait for a reverse gear) | S | STD | Built, unplayed | Tail lamps dim, bright on brake/handbrake and when traffic slows. The game has no reverse gear, so reverse lights are not done |
 | Weather: rain, fog, wet road shine | M | STD | Todo | |
 | Scenery: mountains, clouds, bushes, rocks, buildings, bridges, tunnels | M | STD | Todo | Grass is flat and plain right now |
 | Skid marks and tyre smoke | M | STD | Todo | |
