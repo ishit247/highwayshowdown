@@ -1,5 +1,5 @@
 /* Highway Showdown - service worker: makes the game work offline once it has been opened. */
-const CACHE = 'highway-dash-v9';   // bumped: game renamed to Highway Showdown (page title, heading, manifest)
+const CACHE = 'highway-dash-v10';   // bumped: automatic day/night cycle (scene, frame, track, keys, state, help text)
 const ASSETS = ['./car-game.html', './lib/three/three.module.js', './lib/three/three.core.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
   './src/main.js', './src/three.js', './src/config.js', './src/state.js', './src/game.js',
   './src/cars/specs.js', './src/cars/shapes.js', './src/cars/build-car.js', './src/cars/engine-bay.js',

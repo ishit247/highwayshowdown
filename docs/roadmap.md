@@ -14,7 +14,7 @@
 **Last updated:** 2026-11-14
 **Tracking:** 39 tasks · 4 done · 0 in progress · 0 waiting · 36 todo
 
-**Current position (2026-11-14):** the Three.js upgrade and the split into ES modules (`src/`) are both done. All 9 checks in `tests/` pass, and the module version replays a scripted drive with the same state as the single file. The sRGB colour pipeline and physical light units are in (day and night checked in screenshots; all 9 checks passed before the final lamp edits). The coupe's rear band and headlamps now use the unlit lamp materials so they show at night. Everything is committed, including the settings screen and the rename of the game to Highway Showdown (cache `highway-dash-v9`); both were tried by hand and approved on 2026-11-14. Night mode (K) is play-tested and done; only the automatic day/night cycle is left out. Internal ids (`highway-dash:v1:settings` storage key, `Play-Highway-Dash.bat`) keep the old name on purpose. Next: brake lights that react (S). Reverse lights need a reverse gear first, which the game does not have (speed is clamped at 0 in `src/sim/driving.js`); that is a separate HIGH task. The coupe's front amber indicators are still static and dull.
+**Current position (2026-11-14):** the Three.js upgrade and the split into ES modules (`src/`) are both done. All 9 checks in `tests/` pass, and the module version replays a scripted drive with the same state as the single file. The sRGB colour pipeline and physical light units are in (day and night checked in screenshots; all 9 checks passed before the final lamp edits). The coupe's rear band and headlamps now use the unlit lamp materials so they show at night. Everything is committed, including the settings screen and the rename of the game to Highway Showdown (cache `highway-dash-v9`); both were tried by hand and approved on 2026-11-14. Night mode (K) is play-tested and done, and K now cycles day, night and an automatic day/night cycle (240 s per day, `DAY_LENGTH` in `src/render/frame.js`; cache `highway-dash-v10`). Brake and reverse lights are done too. Internal ids (`highway-dash:v1:settings` storage key, `Play-Highway-Dash.bat`) keep the old name on purpose. The coupe's front amber indicators are still static and dull.
 
 ## Where we are (done)
 - 5 cars with their own shapes, paint and engine sound: Compact Hatch, Family Sedan, Muscle GT, Sports Coupe, Hypercar.
@@ -39,7 +39,7 @@
 ## Phase 2 — Look and atmosphere (P1/P2)
 | Task | Effort | Model | Status | Notes |
 |---|---|---|---|---|
-| **Night mode** (key K; auto cycle not done) | M | STD | Done (2026-11-14; the automatic day/night cycle is not built) | Makes headlights, indicators, brake lights and flames really show. Do after the Three.js upgrade |
+| **Night mode** (key K: day, night, automatic cycle) | M | STD | Done (2026-11-14; automatic cycle built, 240 s per day, needs a hand look) | Makes headlights, indicators, brake lights and flames really show. Do after the Three.js upgrade |
 | Adopt Three.js's sRGB colour pipeline and physical light units | M | STD | Done (2026-11-14) | sRGB on, canvas textures tagged, lights retuned so day and night look like before (checked in screenshots); no tone mapping. Needs a hand look |
 | Brake lights and reverse lights that react | S | STD | Done (2026-11-14) | Tail lamps dim, bright on brake/handbrake and when traffic slows; white reverse lamps light in reverse |
 | Weather: rain, fog, wet road shine | M | STD | Todo | |
