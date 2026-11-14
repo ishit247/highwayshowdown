@@ -108,7 +108,7 @@ export async function openGame({ port = 8124, width = 800, height = 450, beforeL
 // Gives the page `window.__g` with live views of the game state, read from the game's own modules.
 export function installProbe(page) {
   return page.eval(`(async () => {
-    const st = await import('/src/state.js'), tr = await import('/src/sim/traffic.js'), cfg = await import('/src/config.js'), sc = await import('/src/render/scene.js');
-    window.__g = { get S() { return st.S; }, get car() { return st.car; }, traffic: tr.traffic, BARRIER: cfg.BARRIER, scene: sc.scene };
+    const st = await import('/src/state.js'), tr = await import('/src/sim/traffic.js'), cfg = await import('/src/config.js'), sc = await import('/src/render/scene.js'), fr = await import('/src/render/frame.js');
+    window.__g = { get S() { return st.S; }, get playerMesh() { return fr.playerMesh; }, get car() { return st.car; }, traffic: tr.traffic, BARRIER: cfg.BARRIER, scene: sc.scene };
   })()`);
 }

@@ -15,7 +15,7 @@ import { clickSound } from '../audio/effects.js';
 export const camPos = new THREE.Vector3();
 const camLook = new THREE.Vector3();
 
-let playerMesh = null;
+export let playerMesh = null;
 export function rebuildPlayer(){ if (playerMesh) disposeObj(playerMesh); playerMesh = buildCar(car, car.color, {stripes:car.stripes, flames:true}); scene.add(playerMesh); }
 
 const trafficMeshes = new Map();                       // traffic record -> its car mesh
@@ -36,10 +36,11 @@ export function updateSignals(dt){
   cancelIndicatorsAfterTurn();
   setSig(playerMesh, S.sigL, S.sigR, ph);
   setBrake(playerMesh, S.brake || S.hand);
+  playerMesh.userData.reverseLamp.color.setHex(S.rev ? 0xfff6cc : 0x4a4a46);
   for (const t of traffic){ t.sigT -= dt; const m = trafficMeshes.get(t); setSig(m, t.sig<0 && t.sigT>0, t.sig>0 && t.sigT>0, ph); setBrake(m, t.braking); }
 }
 function spinWheels(mesh, v, steer, dt){
-  const u = mesh.userData, step = Math.min(.9, Math.max(0,v)*dt/u.wr);      // capped so fast wheels do not strobe
+  const u = mesh.userData, step = Math.max(-.9, Math.min(.9, v*dt/u.wr));   // capped so fast wheels do not strobe; negative v spins backwards
   u.spin += step;
   for (const w of u.wheels){ w.w.rotation.x = u.spin; if (w.front) w.o.rotation.y = -steer; }
 }
@@ -51,7 +52,7 @@ export function render3D(dt){
   W.x = p.x+rx*S.d; W.y = p.y; W.z = p.z+rz*S.d; W.H = Hc; W.fx = Math.sin(Hc); W.fz = Math.cos(Hc);
   playerMesh.visible = S.cam!=='fp';
   const dm = 1-S.health/100;
-  spinWheels(playerMesh, S.v, S.steer*.32/(1+Math.pow(S.v/12,1.5))*1.1, dt);
+  spinWheels(playerMesh, S.rev ? -S.v : S.v, S.steer*.32/(1+Math.pow(S.v/12,1.5))*1.1, dt);
   S.hoodA += ((S.hoodOpen ? .95 : 0) - S.hoodA)*Math.min(1, dt*5);
   playerMesh.userData.hood.rotation.x = -Math.max(dm*.5, S.hoodA);
   if (playerMesh.userData.engine) playerMesh.userData.engine.visible = playerMesh.userData.hood.rotation.x < -.15;

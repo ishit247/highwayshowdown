@@ -1,5 +1,5 @@
 /* Highway Dash 3D - service worker: makes the game work offline once it has been opened. */
-const CACHE = 'highway-dash-v5';   // bumped: colour pipeline changed (sRGB), so cached modules must be replaced
+const CACHE = 'highway-dash-v6';   // bumped: reverse gear and brake/reverse lamps changed the cached modules
 const ASSETS = ['./car-game.html', './lib/three/three.module.js', './lib/three/three.core.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
   './src/main.js', './src/three.js', './src/config.js', './src/state.js', './src/game.js',
   './src/cars/specs.js', './src/cars/shapes.js', './src/cars/build-car.js', './src/cars/engine-bay.js',

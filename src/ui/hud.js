@@ -28,7 +28,7 @@ export function drawHUD(){
   const bw=170, bx=Wd-18-bw; hud.fillStyle='rgba(0,0,0,.55)'; hud.fillRect(bx,34,bw,10);
   const hp=S.health/100; hud.fillStyle = hp>.6?'#43d17a':hp>.3?'#ffb300':'#ff3d2e'; hud.fillRect(bx,34,bw*hp,10);
   hud.fillStyle='#cfd8e6'; hud.font=`12px ${FONT}`; hud.fillText(Math.round(S.health)+'% · '+(S.cam==='fp'?'V: chase cam':S.cam==='chase'?'V: free cam':'V: cockpit'), Wd-18, 50);
-  hud.fillStyle = S.neutral ? '#6fe3ff' : S.auto ? '#cfd8e6' : '#ffd24a'; hud.font=`12px ${FONT}`; hud.fillText('Gearbox: '+(S.neutral ? 'NEUTRAL' : S.auto ? 'AUTO' : 'MANUAL  Q/E shift')+' (T mode · X neutral)', Wd-18, 66);
+  hud.fillStyle = S.neutral ? '#6fe3ff' : S.auto ? '#cfd8e6' : '#ffd24a'; hud.font=`12px ${FONT}`; hud.fillText('Gearbox: '+(S.rev ? 'REVERSE' : S.neutral ? 'NEUTRAL' : S.auto ? 'AUTO' : 'MANUAL  Q/E shift')+' (T mode · X neutral)', Wd-18, 66);
   if (S.lights>0){ hud.fillStyle='#ffe9a8'; hud.font=`12px ${FONT}`; hud.fillText('Lights: '+(S.lights===1?'WIDE':'FOCUS')+' (L)', Wd-18, 82); }
   if (S.sigL || S.sigR){                                                      // indicator arrows on the dash
     const on = sigPh===1, col = on ? '#3cff6a' : 'rgba(60,255,106,.14)', cx = Wd/2, cy = 38;
@@ -44,7 +44,7 @@ export function drawHUD(){
   }
   if (S.hint>0 && S.started && !S.over){
     hud.textAlign='center'; hud.globalAlpha=Math.min(1,S.hint/2); hud.fillStyle='#fff'; hud.shadowColor='#000'; hud.shadowBlur=6; hud.font=`16px ${FONT}`;
-    hud.fillText('W gas · S brake · A/D steer · Space handbrake · V camera · Z/C indicators · L lights · T gearbox (manual: Q/E) · X neutral · N A/C', Wd/2, Hd*.12); hud.globalAlpha=1; hud.shadowBlur=0;
+    hud.fillText('W gas · S brake/reverse · A/D steer · Space handbrake · V camera · Z/C indicators · L lights · T gearbox (manual: Q/E) · X neutral · N A/C', Wd/2, Hd*.12); hud.globalAlpha=1; hud.shadowBlur=0;
   }
   if (S.over){
     hud.fillStyle='rgba(0,0,0,.6)'; hud.fillRect(0,0,Wd,Hd); hud.textAlign='center'; hud.textBaseline='middle'; hud.fillStyle='#ff4a36';

@@ -6,6 +6,8 @@ const ang = (a,r)=>[Math.sin(a*D2R)*r, -Math.cos(a*D2R)*r];
 function rr(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
 export const FONT = '"Segoe UI",Arial,sans-serif';
 
+export const gearLabel = () => S.rev ? 'R' : S.neutral ? 'N' : 'D'+(S.gear+1);
+
 function lamp(c,x,y,r,health){       // engine warning lamp
   if (health>=50) return;
   c.fillStyle = health<25 ? '#ff2a1a' : '#ffa000'; c.shadowColor=c.fillStyle; c.shadowBlur=r*1.5;
@@ -34,7 +36,7 @@ function drawAnalog(c,cx,cy,r,val){
   c.font=`${r*.1}px ${FONT}`; c.fillStyle='#eee'; c.fillText(g.unit,0,-r*.3);
   // lcd
   rr(c,-r*.36,r*.38,r*.72,r*.26,r*.04); c.fillStyle='#0b0605'; c.fill();
-  c.fillStyle='#ff9a4a'; c.font=`bold ${r*.12}px ${FONT}`; c.fillText(`${S.neutral?'N':'D'+(S.gear+1)}   ${(S.dist/1000).toFixed(1)} km`,0,r*.52);
+  c.fillStyle='#ff9a4a'; c.font=`bold ${r*.12}px ${FONT}`; c.fillText(`${gearLabel()}   ${(S.dist/1000).toFixed(1)} km`,0,r*.52);
   lamp(c,-r*.52,r*.5,r*.06,S.health);
   // needle
   c.save(); c.rotate((-135+270*Math.min(1.03,Math.max(0,val/max)))*D2R);
@@ -72,7 +74,7 @@ function drawDigital(c,cx,cy,r,val){
   c.beginPath(); c.moveTo(-r*.4,-r*.3); c.lineTo(r*.4,-r*.3); c.moveTo(-r*.4,r*.3); c.lineTo(r*.4,r*.3); c.stroke();
   c.fillStyle='#fff'; c.font=`bold ${r*.46}px ${FONT}`; c.fillText(Math.round(val),0,r*.0);
   c.font=`bold ${r*.12}px ${FONT}`; c.textAlign='right'; c.fillText(car.gauge.unit.toUpperCase(),r*.4,r*.43);
-  c.textAlign='left'; c.fillStyle='#bfc4cc'; c.fillText(S.neutral?'N':'D'+(S.gear+1),-r*.4,r*.43);
+  c.textAlign='left'; c.fillStyle='#bfc4cc'; c.fillText(gearLabel(),-r*.4,r*.43);
   c.font=`${r*.075}px ${FONT}`; c.fillStyle='#aab'; c.textAlign='left'; c.fillText('x1000RPM',r*.52,r*1.02);
   lamp(c,-r*1.3,-r*.92,r*.075,S.health);
   c.restore();
@@ -181,8 +183,8 @@ export function drawCockpit(c,W_,H_){
   c.fillStyle='#09090b'; rr(c,sx-H_*.09,sy-H_*.04,H_*.18,H_*.14,H_*.02); c.fill(); c.strokeStyle='#2a2c31'; c.lineWidth=1.5; c.stroke();
   c.font=`bold ${H_*.019}px ${FONT}`; c.textAlign='center'; c.textBaseline='middle';
   const lets = ['P','R','N',S.auto?'D':'M'];
-  lets.forEach((ch,i)=>{ c.fillStyle = i===(S.neutral?2:3) ? '#ffa32b' : '#69707a'; c.fillText(ch, sx-H_*.063+i*H_*.042, sy-H_*.022); });
-  c.fillStyle='#ffa32b'; c.font=`bold ${H_*.021}px ${FONT}`; c.fillText(S.neutral?'N':String(S.gear+1), sx, sy+H_*.07);
+  lets.forEach((ch,i)=>{ c.fillStyle = i===(S.rev?1:S.neutral?2:3) ? '#ffa32b' : '#69707a'; c.fillText(ch, sx-H_*.063+i*H_*.042, sy-H_*.022); });
+  c.fillStyle='#ffa32b'; c.font=`bold ${H_*.021}px ${FONT}`; c.fillText(S.rev?'R':S.neutral?'N':String(S.gear+1), sx, sy+H_*.07);
   c.strokeStyle='#050505'; c.lineWidth=H_*.024; c.lineCap='round'; c.beginPath(); c.moveTo(sx,sy+H_*.01); c.lineTo(sx+kick*.5,sy-H_*.045+kick); c.stroke();
   const kg2=c.createRadialGradient(sx-H_*.01,sy-H_*.075+kick,1,sx,sy-H_*.065+kick,H_*.038);
   kg2.addColorStop(0,'#4b4d52'); kg2.addColorStop(1,'#0c0c0e');

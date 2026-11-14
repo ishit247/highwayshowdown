@@ -7,23 +7,29 @@ import { G_MAX, G_BOOST } from './gearbox.js';
 import { crash } from './collisions.js';
 import { feedback } from './feedback.js';
 
+const REV_MAX = 6, REV_ENGAGE_V = .3;       // reverse top speed (m/s); below this speed the pedals may switch direction
+
 // live: the run was going at the start of the frame; dmgf: damage share at the start of the frame
 export function drive(dt, live, dmgf){
   S.t += dt;
   S.hint = Math.max(0, S.hint-dt);
   S.shake = Math.max(0, S.shake-dt*1.6); S.flash = Math.max(0, S.flash-dt*1.5); S.cool=Math.max(0,S.cool-dt);
   S.scrapeT = Math.max(0, S.scrapeT-dt);
-  S.throttle = live && (keys['w']||keys['arrowup']) ? 1 : 0;
-  S.brake    = live && (keys['s']||keys['arrowdown']) ? 1 : 0;
+  const fwdKey = live && (keys['w']||keys['arrowup']), backKey = live && (keys['s']||keys['arrowdown']);
+  // S held at a standstill engages reverse; W held at a standstill goes back to forward. While reversing the pedals swap jobs.
+  if (!S.rev && backKey && !fwdKey && !S.neutral && S.v < REV_ENGAGE_V) S.rev = true;
+  else if (S.rev && fwdKey && S.v < REV_ENGAGE_V) S.rev = false;
+  S.throttle = (S.rev ? backKey : fwdKey) ? 1 : 0;
+  S.brake    = (S.rev ? fwdKey : backKey) ? 1 : 0;
   S.hand     = live && keys[' '] ? 1 : 0;
   const tgt = live ? ((keys['d']||keys['arrowright']?1:0) - (keys['a']||keys['arrowleft']?1:0)) : 0;
   S.steer += (tgt-S.steer)*Math.min(1, dt*(tgt?4.5:9));
 
-  const vmax = car.topKmh/3.6*(1-.4*dmgf);
+  const gear = S.rev ? 0 : S.gear, vmax = S.rev ? REV_MAX*(1-.4*dmgf) : car.topKmh/3.6*(1-.4*dmgf);
   let v = S.v;
-  let a = S.neutral ? 0 : car.accel*G_BOOST[S.gear]*S.throttle*(1-Math.pow(Math.max(0,v)/vmax,2.4));   // neutral: no drive to the wheels
+  let a = S.neutral ? 0 : car.accel*G_BOOST[gear]*S.throttle*(1-Math.pow(Math.max(0,v)/vmax,2.4));   // neutral: no drive to the wheels
   if (S.shiftT>0){ S.shiftT-=dt; a*=.15; }
-  if (!S.auto){                                    // manual box: rev limiter + lugging
+  if (!S.auto && !S.rev){                          // manual box: rev limiter + lugging
     const r0 = v/(car.topKmh/3.6*G_MAX[S.gear]);
     if (r0>1) a*=.05; a*=Math.min(1,.3+r0*1.4);
   }
@@ -42,14 +48,15 @@ export function drive(dt, live, dmgf){
   const aLat = v*Math.abs(yaw); S.slip = 0;
   if (aLat>aMax){ yaw *= aMax/aLat; S.slip = Math.min(1,(aLat-aMax)/aMax+.35); }
   if (S.hand && v>8 && Math.abs(S.steer)>.1) S.slip = Math.max(S.slip,.6);
-  yaw += S.pullBias*dmgf*.05*Math.min(1,v/12);
-  S.psi += (yaw - v*kappa(S.s))*dt;
+  const dir = S.rev ? -1 : 1;                         // v is a speed; dir says which way along the road it points
+  yaw = yaw*dir + S.pullBias*dmgf*.05*Math.min(1,v/12);
+  S.psi += (yaw - dir*v*kappa(S.s))*dt;
   S.psi = Math.max(-1.1,Math.min(1.1,S.psi));
   v -= v*Math.abs(Math.sin(S.psi))*1.6*dt;           // tyre scrub when sideways
   if (Math.abs(Math.sin(S.psi))>.18) S.slip = Math.max(S.slip, Math.abs(Math.sin(S.psi))*2);
 
-  S.d += -v*Math.sin(S.psi)*dt;
-  S.s += v*Math.cos(S.psi)*dt;
+  S.d += -dir*v*Math.sin(S.psi)*dt;
+  S.s += dir*v*Math.cos(S.psi)*dt;
   S.dist += v*dt;
 
   // guard rails

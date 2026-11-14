@@ -8,7 +8,7 @@ export const G_MAX = [.2,.35,.5,.65,.82,1.0],      // top speed share per gear
 export function updateGearbox(dt){
   const v = S.v, top = car.topKmh/3.6;
   let gs = top*G_MAX[S.gear], r = v/gs;
-  if (S.auto && !S.neutral){
+  if (S.auto && !S.neutral && !S.rev){
     if (r>.93 && S.gear<5 && S.shiftT<=0){ S.gear++; S.shiftT=.22; }
     else if (S.gear>0 && v/(top*G_MAX[S.gear-1])<.55){ S.gear--; }
   }

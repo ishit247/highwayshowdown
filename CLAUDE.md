@@ -37,7 +37,7 @@ Decided (do not re-ask):
 - Cars are built from code in `buildCar`, one spec per car in `STYLES` / `CARS`.
 - Desktop and offline use is a PWA: `manifest.webmanifest`, `sw.js`, `icons/`, started
   locally with `Play-Highway-Dash.bat` (`serve.js`, Node built-ins only).
-- Controls: W/S gas/brake, A/D steer, Space handbrake, T automatic/manual gears,
+- Controls: W/S gas/brake (S at a standstill reverses), A/D steer, Space handbrake, T automatic/manual gears,
   Q/E shift (manual only), X neutral, Z/C left/right indicator, L headlights
   (wide, focus, off), B bonnet, V camera (cockpit, chase, free orbit with the left
   mouse button), K day/night, N air conditioning, H horn, R restart, M menu. Keep this list and the

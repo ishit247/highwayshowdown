@@ -276,6 +276,10 @@ export function buildCar(sp, color, opt){
     pipe(-.34,.07); pipe(.34,.07);
   }
 
+  /* ---- reverse lamps: two small white lamps beside the plate, lit while reversing ---- */
+  const lampRev = new THREE.MeshBasicMaterial({color:0x4a4a46});
+  for (const sx of [-1,1]) add(box(.1,.06,.04), lampRev, sx*.34, clear+bh*.3, zR-.012);
+
   /* ---- turn-signal lamps ---- */
   const indL = new THREE.MeshBasicMaterial({color:0x3a2200}), indR = new THREE.MeshBasicMaterial({color:0x3a2200});
   for (const sx of [-1,1]){
@@ -300,6 +304,6 @@ export function buildCar(sp, color, opt){
     }
   }
 
-  Object.assign(g.userData, {hood, body, flames, ind:{L:indL,R:indR}, tail:lampR, wheels, wr, spin:0, baseColor:new THREE.Color(color)});
+  Object.assign(g.userData, {hood, body, flames, ind:{L:indL,R:indR}, tail:lampR, reverseLamp:lampRev, wheels, wr, spin:0, baseColor:new THREE.Color(color)});
   return g;
 }

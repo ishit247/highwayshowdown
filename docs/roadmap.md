@@ -41,7 +41,7 @@
 |---|---|---|---|---|
 | **Night mode** (key K; auto cycle not done) | M | STD | Built, needs a hand play-test | Makes headlights, indicators, brake lights and flames really show. Do after the Three.js upgrade |
 | Adopt Three.js's sRGB colour pipeline and physical light units | M | STD | Done (2026-11-14) | sRGB on, canvas textures tagged, lights retuned so day and night look like before (checked in screenshots); no tone mapping. Needs a hand look |
-| Brake lights that react (reverse lights wait for a reverse gear) | S | STD | Built, unplayed | Tail lamps dim, bright on brake/handbrake and when traffic slows. The game has no reverse gear, so reverse lights are not done |
+| Brake lights and reverse lights that react | S | STD | Built, unplayed | Tail lamps dim, bright on brake/handbrake and when traffic slows; white reverse lamps light in reverse |
 | Weather: rain, fog, wet road shine | M | STD | Todo | |
 | Scenery: mountains, clouds, bushes, rocks, buildings, bridges, tunnels | M | STD | Todo | Grass is flat and plain right now |
 | Skid marks and tyre smoke | M | STD | Todo | |
@@ -64,7 +64,7 @@
 |---|---|---|---|---|
 | Engines for Hatch, Sedan, Coupe (inline-4, inline-4, flat-6) | M | STD | Todo | Only the Muscle GT and Hypercar are detailed |
 | W16 engine for the Hypercar like the reference photo | M | STD | Todo | |
-| Reverse gear | S | **HIGH** | Todo | Changes the driving and gearbox logic; neutral exists, reverse is the missing slot |
+| Reverse gear | S | **HIGH** | Built, unplayed | S at a standstill reverses (6 m/s cap), W brakes then goes forward; white reverse lamps, R on the gear display. Reversing into traffic behind reuses the "hit from behind" logic, untuned |
 | Manual clutch option | M | **HIGH** | Todo | Driving physics |
 | More cars: SUV, pickup, small sports car | L | STD | Todo | |
 | Paint colours and wheel choices in the menu | M | STD | Todo | |

@@ -46,6 +46,29 @@ async function camera(p) {
   return { name: 'V cycles cockpit, chase, free, cockpit', ok: seen.join() === 'fp,chase,free,fp', detail: seen.join(' > ') };
 }
 
+async function brakeLights(p) {
+  await start(p, COMPACT_HATCH);
+  const tail = () => p.eval('__g.playerMesh.userData.tail.color.getHex()');
+  await p.down('w'); await p.run(64); const gas = await tail();
+  await p.up('w'); await p.down('s'); await p.run(8); const braking = await tail();
+  await p.up('s'); await p.run(8); const released = await tail();
+  return { name: 'brake lamps: bright only while S is held', ok: braking === 0xff2a2a && gas === 0x8a1010 && released === 0x8a1010,
+           detail: `gas ${gas.toString(16)}, brake ${braking.toString(16)}, released ${released.toString(16)}` };
+}
+
+async function reverse(p) {
+  await start(p, COMPACT_HATCH);
+  const s0 = await S(p, 'S.s');
+  await p.down('s'); await p.run(128);
+  const back = await S(p, '({ s: S.s, v: S.v, rev: S.rev })');
+  const lamps = await p.eval('({ rev: __g.playerMesh.userData.reverseLamp.color.getHex(), tail: __g.playerMesh.userData.tail.color.getHex() })');
+  await p.up('s'); await p.down('w'); await p.run(192); await p.up('w');
+  const fwd = await S(p, '({ s: S.s, rev: S.rev })');
+  const ok = back.rev && back.s < s0 - 2 && back.v > 1 && back.v <= 6.01 && lamps.rev === 0xfff6cc && lamps.tail === 0x8a1010 && !fwd.rev && fwd.s > back.s;
+  return { name: 'reverse: S at a standstill backs up with white lamps; W stops then drives forward', ok,
+           detail: `moved ${(back.s - s0).toFixed(1)} m at ${back.v.toFixed(1)} m/s, lamps ${lamps.rev.toString(16)}/${lamps.tail.toString(16)}, then forward ${(fwd.s - back.s).toFixed(1)} m, rev ${fwd.rev}` };
+}
+
 async function toggles(p) {
   await start(p, COMPACT_HATCH);
   const got = [];
@@ -133,7 +156,7 @@ async function offlineCache(p) {
 
 export async function runChecks(p) {
   const results = [];
-  for (const check of [offlineCache, flames, neutral, camera, toggles, night, contacts]) results.push(...[await check(p)].flat());
+  for (const check of [offlineCache, flames, neutral, camera, brakeLights, reverse, toggles, night, contacts]) results.push(...[await check(p)].flat());
   results.push({ name: 'no errors in the console', ok: p.errors.length === 0, detail: p.errors.length ? p.errors.slice(0, 3).join(' | ') : 'clean' });
   return results;
 }
