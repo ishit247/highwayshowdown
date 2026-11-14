@@ -2,6 +2,7 @@
 // player's choices in S. Keep this list in step with the start-menu help text in car-game.html and CLAUDE.md.
 import { S, keys, free, look } from '../state.js';
 import { sel, select, menuOpen } from '../ui/menu.js';
+import { settings, saveSettings } from '../settings.js';
 import { shiftUp, shiftDown } from '../sim/gearbox.js';
 import { startGame, openMenu } from '../game.js';
 
@@ -23,11 +24,11 @@ export function listenForInput(){
     if (k==='b') S.hoodOpen = !S.hoodOpen;
     if (k==='l') S.lights = (S.lights+1)%3;                 // off -> wide -> focus -> off
     if (k==='k') S.night = !S.night;                        // day <-> night
-    if (k==='v'){ S.cam = S.cam==='fp' ? 'chase' : S.cam==='chase' ? 'free' : 'fp'; if (S.cam==='free'){ free.rel=0; free.pitch=.35; free.dist=9; } }
+    if (k==='v'){ S.cam = S.cam==='fp' ? 'chase' : S.cam==='chase' ? 'free' : 'fp'; settings.cam = S.cam; saveSettings(); if (S.cam==='free'){ free.rel=0; free.pitch=.35; free.dist=9; } }
     if (k==='n') S.ac = !S.ac;
     if (k==='z'){ S.sigL = !S.sigL; if (S.sigL) S.sigR = false; S.sigSteer = 0; }       // left indicator
     if (k==='c'){ S.sigR = !S.sigR; if (S.sigR) S.sigL = false; S.sigSteer = 0; }       // right indicator
-    if (k==='t') S.auto = !S.auto;                                                      // automatic <-> manual gearbox
+    if (k==='t'){ S.auto = !S.auto; settings.auto = S.auto; saveSettings(); }                                                    // automatic <-> manual gearbox
     if (k==='x' && S.started && !S.over) S.neutral = !S.neutral;                        // neutral on/off (works in auto and manual)
     if (S.started && !S.over && !S.auto){                                               // Q/E only work in manual
       if (k==='e') shiftUp();

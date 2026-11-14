@@ -1,5 +1,5 @@
 /* Highway Dash 3D - service worker: makes the game work offline once it has been opened. */
-const CACHE = 'highway-dash-v6';   // bumped: reverse gear and brake/reverse lamps changed the cached modules
+const CACHE = 'highway-dash-v7';   // bumped: new src/settings.js module (remembered car, gearbox, camera)
 const ASSETS = ['./car-game.html', './lib/three/three.module.js', './lib/three/three.core.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
   './src/main.js', './src/three.js', './src/config.js', './src/state.js', './src/game.js',
   './src/cars/specs.js', './src/cars/shapes.js', './src/cars/build-car.js', './src/cars/engine-bay.js',
@@ -8,7 +8,7 @@ const ASSETS = ['./car-game.html', './lib/three/three.module.js', './lib/three/t
   './src/render/scene.js', './src/render/frame.js', './src/render/headlights.js', './src/render/effects.js',
   './src/ui/hud.js', './src/ui/dashboard.js', './src/ui/menu.js',
   './src/audio/engine-sound.js', './src/audio/effects.js',
-  './src/input/keys.js'];
+  './src/input/keys.js', './src/settings.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

@@ -2,7 +2,9 @@
 import { CARS } from '../cars/specs.js';
 
 const menu = document.getElementById('menu'), cardsEl = document.getElementById('cards');
-export let sel = 0;
+import { settings, saveSettings } from '../settings.js';
+
+export let sel = settings.car;
 function bar(l,v){ return `<div class="lbl">${l}</div><div class="bar"><i style="width:${Math.round(v*100)}%"></i></div>`; }
 function buildMenu(){
   cardsEl.innerHTML = '';
@@ -18,7 +20,7 @@ function buildMenu(){
 }
 buildMenu();
 
-export function select(i){ sel = (i+CARS.length)%CARS.length; buildMenu(); }   // wraps round at both ends
+export function select(i){ sel = (i+CARS.length)%CARS.length; settings.car = sel; saveSettings(); buildMenu(); }   // wraps round at both ends
 export const menuOpen = () => menu.style.display!=='none';
 export function showMenu(){ menu.style.display='flex'; }
 export function hideMenu(){ menu.style.display='none'; }
