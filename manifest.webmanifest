@@ -1,0 +1,15 @@
+{
+  "name": "Highway Dash 3D",
+  "short_name": "Highway Dash",
+  "description": "3D highway driving game with five cars, damage, manual gears, headlights and exhaust flames.",
+  "start_url": "./car-game.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#05070d",
+  "theme_color": "#0b1220",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
