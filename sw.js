@@ -1,5 +1,5 @@
 /* Highway Showdown - service worker: makes the game work offline once it has been opened. */
-const CACHE = 'highway-dash-v12';   // bumped: weather (rain.js new; scene, frame, track, keys, state, help text, rain sound, night sheen)
+const CACHE = 'highway-dash-v13';   // bumped: exhaust bang sounds per car (audio/effects.js, engine-sound.js)
 const ASSETS = ['./car-game.html', './lib/three/three.module.js', './lib/three/three.core.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
   './src/main.js', './src/three.js', './src/config.js', './src/state.js', './src/game.js',
   './src/cars/specs.js', './src/cars/shapes.js', './src/cars/build-car.js', './src/cars/engine-bay.js',

@@ -114,6 +114,20 @@ async function weather(p) {
            detail: `fog far: clear ${clearFar|0}, rain ${rainFar|0}, fog ${fogFar|0}, back ${backFar|0}` };
 }
 
+async function noFlamesOnPlainCars(p) {
+  const seen = [];
+  for (const [name, key] of [['hatch', COMPACT_HATCH], ['sedan', '2']]) {
+    await start(p, key);
+    await p.press('t');                                                  // manual gearbox
+    await p.eval(`(() => { window.__bursts = 0; let prev = 0;
+      __watchers = [() => { const f = __g.S.flameI; if (f > prev + 1e-6) __bursts++; prev = f; }]; })()`);
+    await p.down('w'); await p.run(128); await p.press('e'); await p.run(64); await p.press('q'); await p.run(64); await p.up('w');
+    seen.push(`${name}=${await p.eval('__bursts')}`);
+    await p.eval('__watchers = []');
+  }
+  return { name: 'hatch and sedan: no exhaust bangs or flames on gear changes', ok: seen.join(' ') === 'hatch=0 sedan=0', detail: seen.join(' ') };
+}
+
 async function wetBraking(p) {
   const stop = async rain => {
     await start(p, COMPACT_HATCH);
@@ -206,7 +220,7 @@ async function settingsScreen(p) {
 
 export async function runChecks(p) {
   const results = [];
-  for (const check of [offlineCache, flames, neutral, camera, brakeLights, reverse, toggles, night, weather, wetBraking, contacts, settingsScreen]) results.push(...[await check(p)].flat());
+  for (const check of [offlineCache, flames, neutral, camera, brakeLights, reverse, toggles, night, weather, wetBraking, noFlamesOnPlainCars, contacts, settingsScreen]) results.push(...[await check(p)].flat());
   results.push({ name: 'no errors in the console', ok: p.errors.length === 0, detail: p.errors.length ? p.errors.slice(0, 3).join(' | ') : 'clean' });
   return results;
 }

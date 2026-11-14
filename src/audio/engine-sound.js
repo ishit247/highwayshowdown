@@ -6,9 +6,9 @@ import { settings } from '../settings.js';
 const SND = {   // t: waveforms, g: osc gains, m: frequency multipliers, cb/ck/ct: filter base/rpm/throttle, lf+rough: engine shudder
   hatch :{t:['sawtooth','triangle','sine'],     g:[.30,.25,.35], m:[2,1,3],   cb:500,ck:.40,ct:900,  vol:.85, drive:5,  q:1.0, lf:20, rough:.05},   // light buzzy 4-cyl
   sedan :{t:['triangle','sawtooth','sine'],     g:[.45,.12,.40], m:[2,1,4],   cb:350,ck:.28,ct:500,  vol:.75, drive:3,  q:.8,  lf:12, rough:.02},   // smooth, quiet 4-cyl
-  muscle:{t:['sawtooth','square','triangle'],   g:[.45,.25,.35], m:[1,.5,2],   cb:180,ck:.17,ct:700,  vol:1.0, drive:14, q:1.6, lf:26, rough:.09},   // deep V8 burble
-  coupe :{t:['sawtooth','square','triangle'],   g:[.38,.12,.30], m:[2,1,4],   cb:450,ck:.38,ct:1300, vol:.85, drive:8,  q:1.2, lf:15, rough:.03},   // raspy inline-6
-  super :{t:['sawtooth','sawtooth','square'],   g:[.35,.25,.12], m:[2,1,6],   cb:650,ck:.50,ct:1700, vol:.9,  drive:10, q:1.4, lf:11, rough:.02},   // high-revving V8 scream
+  muscle:{t:['sawtooth','square','triangle'],   g:[.45,.25,.35], m:[1,.5,2],   cb:180,ck:.17,ct:700,  vol:1.0, drive:14, q:1.6, lf:26, rough:.09, pop:{boom:[150,45], crack:[1800,3000], tail:4, body:800}},   // deep V8 burble
+  coupe :{t:['sawtooth','square','triangle'],   g:[.38,.12,.30], m:[2,1,4],   cb:450,ck:.38,ct:1300, vol:.85, drive:8,  q:1.2, lf:15, rough:.03, pop:{boom:[230,70], crack:[3000,5000], tail:5, body:1200}},   // raspy inline-6
+  super :{t:['sawtooth','sawtooth','square'],   g:[.35,.25,.12], m:[2,1,6],   cb:650,ck:.50,ct:1700, vol:.9,  drive:10, q:1.4, lf:11, rough:.02, pop:{boom:[280,90], crack:[3500,6000], tail:3, body:1600}},   // high-revving V8 scream
 };
 const MASTER_GAIN = .32;   // the mix level that sounds right at the volume setting 1
 export const AU = {
@@ -49,7 +49,7 @@ export const AU = {
     this.eA.type=p.t[0]; this.eB.type=p.t[1]; this.eC.type=p.t[2];
     this.ga.gain.value=p.g[0]; this.gb.gain.value=p.g[1]; this.gc.gain.value=p.g[2];
     this.m=p.m; this.cutB=p.cb; this.cutK=p.ck; this.cutT=p.ct; this.vol=p.vol; this.lf=p.lf; this.lg.gain.value=p.rough;
-    this.elp.Q.value=p.q; this.setDrive(p.drive);
+    this.elp.Q.value=p.q; this.setDrive(p.drive); this.pop=p.pop;     // hatch and sedan have none: they never bang or flame
   },
   update(S,car,dt){
     if(!this.ctx) return; const t=this.ctx.currentTime, tc=.06;
