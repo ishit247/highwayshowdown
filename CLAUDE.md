@@ -14,12 +14,13 @@ only the sections the current task needs.
 
 Decided (do not re-ask):
 
-- One game file: `car-game.html` (plain JavaScript, no build step). Split it into ES
-  modules only when the roadmap's "ship it" phase says so.
+- Plain JavaScript ES modules, no build step: `car-game.html` is the page shell and the code is
+  in `src/` (start at `src/main.js`; layout and dependency rules in `docs/architecture.md`
+  section 4). Split from the single file on 2026-11-14.
 - 3D with Three.js 0.187.0 (r187), official ES-module build in `lib/three/`
-  (`three.module.js` + `three.core.js`), imported by `car-game.html`. No runtime script comes
-  from a CDN. The game keeps the old colour behaviour on purpose (`ColorManagement` off, linear
-  output, light intensities multiplied by PI); moving to the sRGB pipeline is a roadmap task.
+  (`three.module.js` + `three.core.js`), imported only through `src/three.js`. No runtime script comes
+  from a CDN. The game uses the sRGB colour pipeline with physical light units (adopted
+  2026-11-14; see `docs/architecture.md`).
   Three.js was inherited from the first version of the game, not a researched choice; Three.js
   versus Babylon.js is an open decision in `docs/roadmap.md`.
 - ES modules cannot load from a plain file, so the game must be served over http: use
@@ -39,7 +40,7 @@ Decided (do not re-ask):
 - Controls: W/S gas/brake, A/D steer, Space handbrake, T automatic/manual gears,
   Q/E shift (manual only), X neutral, Z/C left/right indicator, L headlights
   (wide, focus, off), B bonnet, V camera (cockpit, chase, free orbit with the left
-  mouse button), N air conditioning, H horn, R restart, M menu. Keep this list and the
+  mouse button), K day/night, N air conditioning, H horn, R restart, M menu. Keep this list and the
   start-menu help text in step.
 
 Proposed, not confirmed: keep code-built cars (stylised) rather than moving to glTF
@@ -117,8 +118,9 @@ These apply to every task.
 ## Reading
 
 - Read the range you need, not the whole file. Search before reading: find the
-  few lines that matter, then read around them. `car-game.html` is large; search for the
-  function first.
+  few lines that matter, then read around them. The code is split by job under `src/`; find the
+  module from the layout in `docs/architecture.md` section 4, then search for the function.
+- Behaviour checks: `node tests/run.mjs` (about 3 minutes; run it in the background).
 
 ## Long-running work
 
@@ -182,7 +184,7 @@ open decision in `docs/roadmap.md`.)
   go into a web search, a URL query string, an issue tracker, a paste service, or a
   third-party API. Reading public documentation, or downloading a public library file, is
   fine; sending project content out with the request is not.
-- No git remotes without asking. There is no git repository in this folder yet.
+- No git remotes without asking. The local repository has no remote.
 - **Ask before:** any step that moves project information off this machine, even
   a convenience. Say what would be sent and to whom.
 
@@ -228,7 +230,7 @@ The recommendation is per task; the user decides, but must be reminded.
 
 | Work | Recommended model |
 |---|---|
-| Collision and damage logic, driving physics, traffic AI, service worker and offline cache, splitting `car-game.html` into modules, anything that could silently break existing behaviour | **HIGH** (Opus or Fable) |
+| Collision and damage logic, driving physics, traffic AI, service worker and offline cache, changes that cut across several `src/` modules, anything that could silently break existing behaviour | **HIGH** (Opus or Fable) |
 | Car shapes, paint, lights, engine bays, HUD and dashboard drawing, sounds, new keys that follow the existing handler, scenery | STANDARD (Sonnet) |
 | Documentation, roadmap updates, running scripted checks, status questions | STANDARD, or cheaper |
 

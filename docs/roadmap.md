@@ -14,7 +14,7 @@
 **Last updated:** 2026-11-14
 **Tracking:** 39 tasks · 2 done · 1 in progress · 0 waiting · 36 todo
 
-**Current position:** the Three.js upgrade is done (r128 to 0.187.0 / r187, 2026-11-14): same look, all scripted checks pass. The project files are not committed yet (the repository only holds an empty first commit). You have played the game by hand but have not reported findings yet. Next: send the play-test findings, commit, then split into ES modules.
+**Current position (2026-11-14):** the Three.js upgrade and the split into ES modules (`src/`) are both done. All 9 checks in `tests/` pass, and the module version replays a scripted drive with the same state as the single file. The split is not committed yet. The game has been played by hand, but no findings have been reported. Next: play a round to confirm it feels the same, commit, send any play-test findings, then night mode (Phase 2).
 
 ## Where we are (done)
 - 5 cars with their own shapes, paint and engine sound: Compact Hatch, Family Sedan, Muscle GT, Sports Coupe, Hypercar.
@@ -31,7 +31,7 @@
 | Full play-test of all 5 cars: every key, crash, restart, menu round-trip | S | You (by hand) | Todo | Everything so far was tested by script, not by hand |
 | Fix whatever the play-test finds | S–M | STD (HIGH if it touches physics or collisions) | Todo | |
 | Performance check on a weaker PC (frame rate, lots of traffic) | S | STD | Todo | Cars are now much more detailed |
-| `git init` and a first commit | S | STD | In progress | The repository exists (set up by you) but holds only an empty first commit; the project files are still untracked |
+| `git init` and a first commit | S | STD | Done | Project committed by you after the Three.js upgrade; no remote |
 | **Upgrade Three.js from r128 (2021) to the current stable release** | M–L | **HIGH** | Done | 0.187.0 (r187) in `lib/three/`, done 2026-11-14. Looks identical, all scripted checks pass. The game now needs the local server: `car-game.html` no longer opens by double-click. Steps under "Library upgrade plan" |
 | Remember settings (last car, gearbox mode, camera) in the browser | S | STD | Todo | Small, feels polished |
 | Settings screen: volume, quality, key list | M | STD | Todo | Needed before sharing with others |
@@ -39,8 +39,8 @@
 ## Phase 2 — Look and atmosphere (P1/P2)
 | Task | Effort | Model | Status | Notes |
 |---|---|---|---|---|
-| **Night mode** (key or auto cycle) | M | STD | Todo | Makes headlights, indicators, brake lights and flames really show. Do after the Three.js upgrade |
-| Adopt Three.js's sRGB colour pipeline and physical light units | M | STD | Todo | The upgrade kept the old (linear, no gamma) look on purpose so nothing changed; tune the lighting properly once, together with night mode |
+| **Night mode** (key K; auto cycle not done) | M | STD | Built, needs a hand play-test | Makes headlights, indicators, brake lights and flames really show. Do after the Three.js upgrade |
+| Adopt Three.js's sRGB colour pipeline and physical light units | M | STD | Done (2026-11-14) | sRGB on, canvas textures tagged, lights retuned so day and night look like before (checked in screenshots); no tone mapping. Needs a hand look |
 | Brake lights and reverse lights that react | S | STD | Todo | Cars still have static tail-lights |
 | Weather: rain, fog, wet road shine | M | STD | Todo | |
 | Scenery: mountains, clouds, bushes, rocks, buildings, bridges, tunnels | M | STD | Todo | Grass is flat and plain right now |
@@ -83,7 +83,7 @@
 ## Phase 6 — Ship it (P1 when you are ready to share)
 | Task | Effort | Model | Status | Notes |
 |---|---|---|---|---|
-| Split the single 1,500-line HTML file into ES modules | M | **HIGH** | Todo | No feature change; the layout is in [architecture.md](architecture.md). Follows the Three.js upgrade |
+| Split the single 1,500-line HTML file into ES modules | M | **HIGH** | Done | 2026-11-14, no feature change: 25 modules under `src/`, layout and reasons in [architecture.md](architecture.md) section 4. Checks kept in `tests/` (`node tests/run.mjs`). A seeded, frame-stepped replay (all checks plus a scripted drive, 6,040 frames) matched the single file on every frame, and its five screenshots were byte-identical. In that replay, Three.js's UUID draws used their own random stream. One change can't be seen in play: a traffic car's mesh is now built after its speed is drawn, so with a fixed seed the traffic speeds come from a different point in the random stream (still 15–30 m/s). Service-worker cache `highway-dash-v3` |
 | Launcher page (index.html) listing all games | S | STD | Todo | |
 | Installable web app (PWA) with offline play | S | STD | Done | Run `Play-Highway-Dash.bat`, then use the browser's Install button. See the last section |
 | Host it online so others can play | S | STD | Todo | Static hosting is enough; ask before anything leaves this machine |
@@ -101,7 +101,7 @@ Whole task: **HIGH** model, effort M–L, status **Done** (2026-11-14, Three.js 
 | 1 | Back up the working game and keep the old `lib/three.min.js` until the check passes | none | Done (file copy in the scratch folder; nothing was committed, see Phase 1) |
 | 2 | Look up the current stable version from the package registry (no project content sent), download the official module build into `lib/three/` | low | Done: 0.187.0, published 2026-10-30 |
 | 3 | Switch the page to ES modules; current releases no longer ship the single-file `three.min.js` build | medium | Done: `<script type="module">` importing `lib/three/three.module.js`; opening the file from disk now shows a message pointing to `Play-Highway-Dash.bat` |
-| 4 | Colour management | medium: colours shift if missed | Done by keeping the old behaviour: `ColorManagement.enabled = false` and linear output, so colours are identical. The proper sRGB pipeline is a separate Phase 2 task |
+| 4 | Colour management | medium: colours shift if missed | Kept the old behaviour at first (`ColorManagement` off); the proper sRGB pipeline was then adopted in Phase 2 (2026-11-14) |
 | 5 | Lighting: physically based light units | medium | Done: hemisphere, sun and headlight intensities multiplied by PI, which reproduces the old brightness |
 | 6 | Fix any removed or renamed API the console reports | low | Done: none needed, the console was clean |
 | 7 | Compare before/after renders | the check that matters | Done: four scenes (Muscle GT chase, Hypercar chase, Sports Coupe cockpit, Hatch with focus beams) identical to the eye |

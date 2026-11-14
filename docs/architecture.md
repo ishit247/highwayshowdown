@@ -20,7 +20,7 @@ Out of scope for now: multiplayer, accounts, a backend, mobile-first controls (s
 
 | Area | Choice | Why | Alternatives considered | Status |
 |---|---|---|---|---|
-| Language | Plain JavaScript (ES2022) | No build step; opens from disk; fastest iteration | TypeScript (needs a compiler) | Decided |
+| Language | Plain JavaScript (ES2022) in ES modules under `src/` | No build step; fastest iteration | TypeScript (needs a compiler) | Decided |
 | Type safety | JSDoc types + `// @ts-check` in the editor | Catches mistakes with zero build cost | Full TypeScript later if the code grows | Proposed |
 | 3D | Three.js 0.187.0 (r187), official ES-module build, local copy in `lib/three/` | Huge community, fine for code-built models; unminified build is ~2 MB, cached for offline use | Babylon.js (heavier, more built in) | Built (upgraded from r128 on 2026-11-14); engine choice still open |
 | Dashboard / HUD | 2D canvas drawn each frame | Full control, no DOM cost in the loop | DOM overlay | Built |
@@ -30,8 +30,8 @@ Out of scope for now: multiplayer, accounts, a backend, mobile-first controls (s
 | Car models | Built from code (`buildCar`) | No asset pipeline, every part is addressable | glTF models from Blender or a library | Decided, realism question open |
 | Offline / install | PWA: manifest + service worker | One codebase for browser and desktop | Electron `.exe` (large, no benefit) | Built |
 | Local server | `serve.js`, Node built-ins only | Service workers need `http://localhost` | Any static server | Built |
-| Tests | Scripted headless Edge runs (remote-debugging port) | Runs the real game and asserts numbers | A test framework (overkill at this size) | Built, scripts not yet kept in repo |
-| Version control | Local git | History, diffs, safe refactors | — | Proposed (no repository yet) |
+| Tests | Scripted headless Edge runs (remote-debugging port), `tests/`, Node built-ins only | Runs the real game and asserts numbers | A test framework (overkill at this size) | Built |
+| Version control | Local git, no remote | History, diffs, safe refactors | — | Built |
 | Hosting | Any static host | The game is static files | — | Open |
 
 ## 3. System overview
@@ -54,7 +54,7 @@ Out of scope for now: multiplayer, accounts, a backend, mobile-first controls (s
                               - engine + effect sounds
 ```
 
-One frame (`loop`): read `dt` (capped at 0.05 s) -> `update(dt)` -> `AU.update` -> `updateSignals` -> `render3D` -> `drawHUD`.
+One frame (`loop` in `src/main.js`): read `dt` (capped at 0.05 s) -> `step(dt)` -> `AU.update` -> `updateSignals` -> `render3D` -> `drawHUD`.
 Simulation never draws; rendering never changes game rules.
 
 ### Conventions (Built)
@@ -65,53 +65,52 @@ Simulation never draws; rendering never changes game rules.
 
 ## 4. Code structure
 
-### Today (Built): one file, `car-game.html`, ~1,500 lines
-| Section | Contents |
-|---|---|
-| CARS | `STYLES` (shape numbers) and `CARS` (names, speed, grip, gauge) |
-| GAME STATE | `freshState()`, the key map |
-| THREE SETUP | renderer, scene, lights, sky |
-| TRACK | road curves, hills, ribbons, trees and lamps |
-| CAR MODELS | geometry helpers, `buildCar` (body, cabin, wheels, lamps, engine bays) |
-| PARTICLES / AUDIO | smoke and sparks; engine, crash, pop and indicator sounds |
-| TRAFFIC / GAME LOGIC | NPC spawn and AI; `update(dt)` driving, gears, collisions, damage |
-| RENDER (3D) / HEADLIGHTS | per-frame scene updates, camera modes, light beams |
-| HUD / DASHBOARD | all 2D drawing |
-| MENU + INPUT + LOOP | menu, key handler, `loop` |
-
-Other files: `sw.js`, `manifest.webmanifest`, `serve.js`, `Play-Highway-Dash.bat`, `lib/`, `icons/`, `docs/`, `previews/`.
-
-### Target (Proposed): plain ES modules, still no bundler
+### Built: plain ES modules, no bundler (split from the single file on 2026-11-14, no feature change)
 ```
-car-game.html            shell: canvas, menu markup, <script type="module" src="src/main.js">
+car-game.html            shell: canvas, menu markup and help text, the file:// notice, <script type="module" src="src/main.js">
 src/
-  main.js                bootstrap and the game loop only
-  config.js              constants and the key-binding table (single source for menu text + handler)
-  state.js               freshState(), the one owner of S
+  main.js                bootstrap and the game loop only; plugs audio, particles and car meshes into sim/feedback.js
+  three.js               re-exports lib/three with ColorManagement off; every module imports Three.js from here
+  config.js              road cross-section shared by sim, track and traffic (HALF, LIM, BARRIER, LANES)
+  state.js               the one owner of S and the current car (newRun), plus keys, W, look, free
+  game.js                startGame / openMenu (a run starts and ends only here)
   cars/specs.js          STYLES, CARS (data only)
-  cars/build-car.js      geometry builders: body, cabin, wheels, lamps
-  cars/engine-bay.js     engine bays and bonnet underside
-  world/track.js         road, hills, scenery
-  sim/driving.js         steering, speed, rail clamp
-  sim/gearbox.js         auto/manual/neutral, pop queue
-  sim/collisions.js      NPC and rail contacts, damage
-  sim/traffic.js         NPC spawn and AI
-  render/scene.js        renderer, camera modes
+  cars/shapes.js         geometry helpers (extruded profiles, taper, rounded rects, stripes)
+  cars/build-car.js      buildCar: body, bonnet, cabin, wheels, lamps, flames, per-car details
+  cars/engine-bay.js     bonnet underside and engine bays (front-engined cars, Hypercar)
+  world/road.js          road shape: curvature, hills, trackAt, placeOn (no Three.js objects)
+  world/track.js         road, grass and rail ribbons, trees and lamps
+  sim/step.js            one simulation step: drive -> gearbox -> traffic -> score -> damage smoke
+  sim/driving.js         pedals and steering from keys, speed, rail clamp, indicator self-cancel
+  sim/gearbox.js         auto/manual/neutral, manual shifts (Q/E), pop queue, rpm, speedo needle
+  sim/collisions.js      crash damage, player-NPC contacts, damage smoke
+  sim/traffic.js         NPC spawn, AI and despawn
+  sim/feedback.js        hooks through which sim/ asks for sounds, sparks and traffic meshes
+  render/scene.js        renderer, scene, camera, lights, sky, disposeObj
+  render/frame.js        per-frame scene update: car meshes, indicators, camera modes, render
   render/headlights.js   beams
   render/effects.js      particles, flames
   ui/hud.js  ui/dashboard.js  ui/menu.js
-  audio/engine-sound.js  audio/effects.js
-  input/keys.js          keydown/keyup -> intents in S
+  audio/engine-sound.js  the audio context and the continuous sounds;  audio/effects.js  one-shot sounds
+  input/keys.js          keydown/keyup/mouse -> keys and toggles in S
 tests/                   scripted headless checks (see section 8)
 ```
+Differences from the plan that preceded the split, and why:
+- `sim/feedback.js`: the simulation decides when a crash is heard, a bang pops, sparks fly or a traffic car appears, but rule 1 below forbids importing audio or rendering. `main.js` fills in the hooks; they are called synchronously, so the order of events (and of random numbers) is unchanged.
+- Traffic records hold no mesh: `render/frame.js` keeps a map from traffic record to car mesh, created and disposed through the feedback hooks. `buildCar` no longer adds the car to the scene; its caller does. Three.js draws `Math.random` for every object's UUID, and the mesh is now built after the car's speed is drawn rather than before, so a seeded run spawns traffic with different speeds than the single file did (same 15–30 m/s rule).
+- `world/road.js` split from `world/track.js` so the simulation can use the road's shape without creating any scene objects.
+- `render/frame.js` holds the per-frame update and camera modes; `render/scene.js` stays a leaf (nothing imports it back), which avoids circular imports.
+- `src/three.js` guarantees the colour setting is in place before any module creates a colour.
+- `config.js` has no key-binding table yet: building one changes the menu markup, which is a feature change (see section 10).
+- The indicator self-cancel rule lives in `sim/driving.js`, but `render/frame.js` calls it from `updateSignals`, between the tick sound and the lamps, where it always ran. Moving the call into `sim/step.js` would change when the last tick plays by one frame; worth doing when indicators are next touched.
+- `main.js` imports `render/frame.js` first, so scene objects are still created in the original order (object ids decide the renderer's draw order on ties).
+
 **Dependency rules** (these make the code testable and keep it from tangling):
 1. `sim/*` imports nothing from `render/`, `ui/` or `audio/`. It can run without a screen.
 2. `render/`, `ui/`, `audio/` read state; they never decide game rules.
-3. `input/` only writes player intent into `S`.
+3. `input/` only writes player intent into `S` (Q/E call the gearbox's shift rules).
 4. `cars/specs.js` is data only: no functions that touch the scene.
 5. No circular imports. Shared constants live in `config.js`.
-
-Splitting the file is a refactor with no new features: do it in one task, verify the game behaves identically, then continue.
 
 ## 5. Rules for efficient code
 The target is a steady 60 fps at 1280 × 720 on a mid-range laptop and never below 30 on a low-end PC.
@@ -171,11 +170,11 @@ Match the check to the risk (see CLAUDE.md "How much verification").
 - `V` cycles cockpit, chase and free camera; `T`, `X`, `Z`, `C`, `L`, `B` toggle what the menu says they do.
 - The service worker installs and the cache holds every file in `sw.js`.
 
-Today these scripts exist only in the session scratchpad. **Proposed:** keep them in `tests/` as small Node scripts that start `serve.js`, drive Edge through its debugging port, assert, and print one line per check. Scripts cannot judge feel (sound level, handling); those still need the player.
+**Built:** `node tests/run.mjs` runs them all (about 3 minutes, software rendering) and prints one line per check. `tests/harness.mjs` starts `serve.js` on port 8124 and headless Edge with a throw-away profile. Before any game code runs, it seeds `Math.random` and replaces `requestAnimationFrame` with hand-stepped 1/64 s frames, so every run is identical. The checks read the game through its own modules (`import('/src/state.js')`, see `installProbe`), and the contact check uses a small autopilot that steers at traffic. Scripts cannot judge feel (sound level, handling); those still need the player.
 
 ## 9. Build, release and versioning
 - **No build step today.** Run `Play-Highway-Dash.bat` (ES modules need http, so opening `car-game.html` by double-click shows a hint instead of the game).
-- **Colour and light units:** the game deliberately keeps the old look (`ColorManagement` off, linear output, light intensities x PI). Switching to the sRGB pipeline is a roadmap task.
+- **Colour and light units:** the sRGB pipeline is on (Three.js defaults: `ColorManagement` on, sRGB output). Hex and CSS colours are sRGB; colour textures are made with `THREE.canvasTexture` (in `src/three.js`), which tags them sRGB; raw RGB numbers need `setRGB(r,g,b,THREE.SRGBColorSpace)`, or are linear multipliers (the night ground shade). Light intensities are physical: `PI` is full brightness, tuned in `LIGHT` in `src/render/scene.js`. No tone mapping.
 - **Install as an app:** from `http://localhost:8123` use the browser's Install button.
 - **Release:** the whole folder is the product; publish it to any static host. Before publishing, bump the cache name in `sw.js`.
 - **Versioning (Proposed):** initialise a local git repository, one commit per finished task, tag meaningful milestones. No remote without asking.
@@ -183,14 +182,12 @@ Today these scripts exist only in the session scratchpad. **Proposed:** keep the
 ## 10. Known technical debt (honest list)
 | Item | Impact | Fix |
 |---|---|---|
-| One ~1,500-line file with global state | Hard to navigate and test | Module split in section 4 |
-| `buildCar` is ~450 lines | Risky to change | Split into builders per part |
+| `buildCar` is still ~260 lines (engine bays and bonnet underside moved out) | Risky to change | Split body, cabin, wheels and lamps into builders per part |
 | Traffic cars rebuild full geometry on spawn | Spikes and memory | Cache geometry per style; instancing later |
 | Some per-frame allocations (damage tint colour, chase-camera target) | Garbage collection hitches | Reuse objects |
 | Key hints duplicated in menu, HUD hint and docs | Easy to get out of sync | One key table |
 | Magic numbers throughout | Hard to tune | Named constants in `config.js` |
-| Test scripts not in the repository | Checks are not repeatable | `tests/` folder |
-| No git repository | No history or safe rollback | `git init` |
+| A rule in a render module: indicator self-cancel is called from `render/frame.js` | Breaks dependency rule 2 in spirit | Call it from `sim/step.js` (moves the last tick by one frame) |
 | Service-worker cache name is manual | Players may see a stale game | Bump on release (script later) |
 
 ## 11. Change checklist (use on every task)
