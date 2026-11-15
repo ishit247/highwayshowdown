@@ -3,12 +3,16 @@
 import * as THREE from '../three.js';
 import { extrudeProfile, taperX, lerpN, bez, roundRect, ribbon } from './shapes.js';
 import { addBonnetUnderside, addEngineBay, addHyperEngine } from './engine-bay.js';
+import { rimFace } from './rims.js';
 
 const _tireG = {}, _tireM = new THREE.MeshLambertMaterial({color:0x0b0b0d});
-function addWheel(g, sx, z, hw, wr, ww, rimCol){
+const RIM_DESIGN = {muscle:'swirl', coupe:'forged', super:'twin'};      // the other cars keep the plain five-spoke rim
+function addWheel(g, sx, z, hw, wr, ww, rimCol, design){
   const key = wr+'_'+ww;
   if (!_tireG[key]){
     _tireG[key] = {
+      face: new THREE.CircleGeometry(wr*.88,48).rotateY(Math.PI/2),     // rim face, normal along +x
+      caliper: new THREE.BoxGeometry(.014, wr*.3, wr*.42),
       tire: new THREE.CylinderGeometry(wr,wr,ww,24).rotateZ(Math.PI/2),
       disc: new THREE.CylinderGeometry(wr*.7,wr*.7,ww+.02,20).rotateZ(Math.PI/2),
       cap : new THREE.CylinderGeometry(wr*.13,wr*.13,ww+.04,10).rotateZ(Math.PI/2),
@@ -19,8 +23,13 @@ function addWheel(g, sx, z, hw, wr, ww, rimCol){
   const dark = new THREE.MeshLambertMaterial({color:0x1b1c20});
   const o = new THREE.Group(); o.position.set(sx*hw, wr, z);
   const w = new THREE.Group(); o.add(w);          // w spins, o steers
-  w.add(new THREE.Mesh(G.tire,_tireM), new THREE.Mesh(G.disc,dark), new THREE.Mesh(G.cap,rimM));
-  for (let i=0;i<5;i++){
+  const R = design && rimFace(design);
+  w.add(new THREE.Mesh(G.tire,_tireM), new THREE.Mesh(G.disc, R ? R.brake : dark), new THREE.Mesh(G.cap,rimM));
+  if (design){
+    const face = new THREE.Mesh(G.face, R.face);
+    face.position.x = sx*(ww/2+.026); if (sx<0) face.rotation.y = Math.PI; w.add(face);
+    if (R.caliper){ const cal = new THREE.Mesh(G.caliper, R.caliper); cal.position.set(sx*(ww/2+.017), wr*.3, wr*.32); o.add(cal); }   // on o: it steers but does not spin
+  } else for (let i=0;i<5;i++){
     const a = new THREE.Group(); a.rotation.x = i*Math.PI*2/5;
     const sp = new THREE.Mesh(G.spoke, rimM); sp.position.set(sx*(ww/2+.012), wr*.34, 0); a.add(sp); w.add(a);
   }
@@ -144,7 +153,7 @@ export function buildCar(sp, color, opt){
   const archR = Math.min(wr+.045, yT-nd*.5-(wr+.02)-.01);
   for (const sx of [-1,1]) for (const sz of [-1,1]){
     const hw = sz<0 ? hwR : hwF;
-    const wh = addWheel(g, sx, sz*wz, hw, wr, ww, sp.rim); wh.front = sz>0; wheels.push(wh);
+    const wh = addWheel(g, sx, sz*wz, hw, wr, ww, sp.rim, RIM_DESIGN[k]); wh.front = sz>0; wheels.push(wh);
     const a = new THREE.Mesh(new THREE.CircleGeometry(archR,22), M(0x050505));
     a.position.set(sx*(hw+.06+.012), wr+.02, sz*wz); a.rotation.y = sx*Math.PI/2; g.add(a);
   }

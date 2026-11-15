@@ -78,6 +78,7 @@ src/
   cars/shapes.js         geometry helpers (extruded profiles, taper, rounded rects, stripes)
   cars/build-car.js      buildCar: body, bonnet, cabin, wheels, lamps, flames, per-car details
   cars/engine-bay.js     bonnet underside and engine bays (front-engined cars, Hypercar)
+  cars/rims.js           rim faces (canvas textures with cut-out gaps) and calipers for the Muscle GT, Coupe and Hypercar
   world/road.js          road shape: curvature, hills, trackAt, placeOn (no Three.js objects)
   world/track.js         road, grass and rail ribbons, trees and lamps
   sim/step.js            one simulation step: drive -> gearbox -> traffic -> score -> damage smoke

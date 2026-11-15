@@ -3,7 +3,7 @@
 import * as THREE from '../three.js';
 import { renderer, scene, camera, disposeObj, applyAtmosphere } from './scene.js';
 import { updateRain } from './rain.js';
-import { updateTrack, placeScenery, setGroundShade, setSheen } from '../world/track.js';
+import { updateTrack, placeScenery, setGroundShade } from '../world/track.js';
 import { buildCar, glowK } from '../cars/build-car.js';
 import { updateParts, updateFlames } from './effects.js';
 import { updateHeadlights } from './headlights.js';
@@ -57,9 +57,7 @@ function updateSky(dt){
   if (Math.abs(S.dark - darkShown) + Math.abs(S.rain - rainShown) + Math.abs(S.mist - mistShown) > .004){
     darkShown = S.dark; rainShown = S.rain; mistShown = S.mist;
     applyAtmosphere(darkShown, rainShown, mistShown); setGroundShade(darkShown, rainShown, mistShown);
-  }
-  setSheen(S.dark, S.rain, S.mist, S.started && S.lights > 0);
-}
+  }}
 export function render3D(dt){
   updateSky(dt);
   const p = placeOn(playerMesh, S.s, S.d, S.psi);

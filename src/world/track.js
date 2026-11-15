@@ -55,9 +55,11 @@ const rbRoad = makeRibbon(mk(roadTex)), rbGL = makeRibbon(mk(grassTex)), rbGR = 
 const sheenTex = makeTex(128,256,(x,w,h)=>{
   x.fillStyle='#000'; x.fillRect(0,0,w,h);
   for (let i=0;i<70;i++){
-    const cx=Math.random()*w, cy=Math.random()*h, rw=3+Math.random()*14, rh=10+Math.random()*50;
-    const g=x.createRadialGradient(cx,cy,0,cx,cy,rh); g.addColorStop(0,`rgba(255,255,255,${.25+Math.random()*.5})`); g.addColorStop(1,'rgba(255,255,255,0)');
-    x.save(); x.translate(cx,cy); x.scale(rw/rh,1); x.translate(-cx,-cy); x.fillStyle=g; x.fillRect(cx-rh,cy-rh,rh*2,rh*2); x.restore();
+    const cx=Math.random()*w, y0=Math.random()*h, rw=3+Math.random()*14, rh=10+Math.random()*50, a=.25+Math.random()*.5;
+    for (const cy of [y0-h, y0, y0+h]){                    // drawn again one tile up and down so the texture repeats without a seam
+      const g=x.createRadialGradient(cx,cy,0,cx,cy,rh); g.addColorStop(0,`rgba(255,255,255,${a})`); g.addColorStop(1,'rgba(255,255,255,0)');
+      x.save(); x.translate(cx,cy); x.scale(rw/rh,1); x.translate(-cx,-cy); x.fillStyle=g; x.fillRect(cx-rh,cy-rh,rh*2,rh*2); x.restore();
+    }
   }
 }, false);
 const sheenMat = new THREE.MeshBasicMaterial({map:sheenTex, vertexColors:true, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, side:THREE.DoubleSide});
@@ -73,22 +75,16 @@ rbSheen.m.visible = false;
 }
 
 // These materials ignore lights, so darkness (0 day .. 1 night) is a colour multiplier on their textures
-// (linear values: a dim, blue moonlit ground). Rain darkens the road (wet) more than the grass.
+// (linear values: a dim, blue moonlit ground). Rain darkens the road (wet) more than the grass, and the sheen
+// reflects the horizon sky (fog colour), so it fades to nothing at night; mist hides it.
 export function setGroundShade(dark, rain, mist){
   const overcast = Math.max(rain*.8, mist), grass = 1 - .25*overcast;
   for (const rb of [rbRoad,rbGL,rbGR,rbRL,rbRR]){
     const k = (rb === rbRoad ? 1 - .45*rain : grass) * (rb === rbRoad ? 1 - .15*mist : 1);
     rb.m.material.color.setRGB((1+(.018-1)*dark)*k, (1+(.023-1)*dark)*k, (1+(.056-1)*dark)*k);
   }
-}
-// The sheen reflects the horizon sky; at night, with the headlights on, it also reflects their warm light down the beam.
-// Called every frame because the L key changes it without any change in the weather.
-const HEADLIGHT_GLINT = new THREE.Color(0xffe6a8);
-export function setSheen(dark, rain, mist, headlightsOn){
   rbSheen.m.visible = rain > .01;
-  sheenMat.color.copy(scene.fog.color);
-  if (headlightsOn){ const k = .55*dark; sheenMat.color.r += HEADLIGHT_GLINT.r*k; sheenMat.color.g += HEADLIGHT_GLINT.g*k; sheenMat.color.b += HEADLIGHT_GLINT.b*k; }
-  sheenMat.color.multiplyScalar(.9*rain*(1-mist));
+  sheenMat.color.copy(scene.fog.color).multiplyScalar(.9*rain*(1-mist));
 }
 function setRow(rb,k,a,b,c,d,e,f,u0,u1,v){
   const p=rb.pos; let o=k*6; p[o]=a;p[o+1]=b;p[o+2]=c;p[o+3]=d;p[o+4]=e;p[o+5]=f;

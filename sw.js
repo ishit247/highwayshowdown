@@ -1,8 +1,8 @@
 /* Highway Showdown - service worker: makes the game work offline once it has been opened. */
-const CACHE = 'highway-dash-v13';   // bumped: exhaust bang sounds per car (audio/effects.js, engine-sound.js)
+const CACHE = 'highway-dash-v15';   // bumped: per-car rims (rims.js new), exhaust bang sounds, wet headlight glint, Hypercar engine voice
 const ASSETS = ['./car-game.html', './lib/three/three.module.js', './lib/three/three.core.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
   './src/main.js', './src/three.js', './src/config.js', './src/state.js', './src/game.js',
-  './src/cars/specs.js', './src/cars/shapes.js', './src/cars/build-car.js', './src/cars/engine-bay.js',
+  './src/cars/specs.js', './src/cars/shapes.js', './src/cars/build-car.js', './src/cars/engine-bay.js', './src/cars/rims.js',
   './src/world/road.js', './src/world/track.js',
   './src/sim/step.js', './src/sim/driving.js', './src/sim/gearbox.js', './src/sim/collisions.js', './src/sim/traffic.js', './src/sim/feedback.js',
   './src/render/scene.js', './src/render/frame.js', './src/render/headlights.js', './src/render/rain.js', './src/render/effects.js',

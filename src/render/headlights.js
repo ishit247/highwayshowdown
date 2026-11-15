@@ -18,10 +18,26 @@ const HL = (function(){
   const poolG = new THREE.Object3D(); scene.add(poolG);
   const poolMat = new THREE.MeshBasicMaterial({map:radTex('rgba(255,240,190,1)','rgba(255,240,190,0)'), transparent:true, opacity:.4, blending:THREE.AdditiveBlending, depthWrite:false});
   const pool = new THREE.Mesh(new THREE.PlaneGeometry(1,1), poolMat); pool.rotation.x = -Math.PI/2; pool.position.y = .06; pool.visible=false; poolG.add(pool);
+  // On a wet road the beam also leaves long thin reflections stretched along the road; they fade out towards every edge
+  // of the pool, so they only ever show inside the beam.
+  const glintTex = (() => {
+    const c = document.createElement('canvas'); c.width = 128; c.height = 256; const x = c.getContext('2d');
+    for (let i=0;i<26;i++){
+      const sx = 8+Math.random()*112, w = 1.5+Math.random()*4, y0 = Math.random()*120, len = 90+Math.random()*130;
+      const g = x.createLinearGradient(0,y0,0,y0+len); g.addColorStop(0,'rgba(255,236,190,0)'); g.addColorStop(.5,`rgba(255,236,190,${.25+Math.random()*.45})`); g.addColorStop(1,'rgba(255,236,190,0)');
+      x.fillStyle = g; x.fillRect(sx-w/2, y0, w, len);
+    }
+    x.globalCompositeOperation = 'destination-in';
+    const m = x.createRadialGradient(64,128,0,64,128,128); m.addColorStop(0,'#fff'); m.addColorStop(.6,'rgba(255,255,255,.6)'); m.addColorStop(1,'rgba(255,255,255,0)');
+    x.setTransform(.5,0,0,1,32,0); x.fillStyle = m; x.fillRect(0,0,256,256);          // squashed to an ellipse that fits the 128 x 256 canvas
+    const t = THREE.canvasTexture(c); return t;
+  })();
+  const glintMat = new THREE.MeshBasicMaterial({map:glintTex, transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false});
+  const glint = new THREE.Mesh(new THREE.PlaneGeometry(1,1), glintMat); glint.rotation.x = -Math.PI/2; glint.position.y = .08; glint.visible = false; poolG.add(glint);
   const glowTex = radTex('rgba(255,246,210,1)','rgba(255,246,210,0)');
   const glows = [0,1].map(()=>{ const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, opacity:.8})); sp.visible=false; scene.add(sp); return sp; });
   const spots = [0,1].map(()=>{ const l = new THREE.SpotLight(0xfff0cc, 0, 60, .6, .6, 1); scene.add(l, l.target); return l; });
-  return {cones, poolG, pool, poolMat, glows, spots};
+  return {cones, poolG, pool, poolMat, glint, glintMat, glows, spots};
 })();
 const _hv = new THREE.Vector3();
 export function updateHeadlights(Hc, sl){
@@ -49,4 +65,7 @@ export function updateHeadlights(Hc, sl){
   }
   HL.pool.visible = on;
   if (on){ placeOn(HL.poolG, S.s+P.poolD, S.d, S.psi); HL.pool.scale.set(P.poolW, P.poolL, 1); HL.poolMat.opacity = P.poolO; }
+  const wet = S.rain*(1-S.mist)*S.dark;                                                // reflections need rain and a dark sky
+  HL.glint.visible = on && wet > .02;
+  if (HL.glint.visible){ HL.glint.scale.set(P.poolW*.9, P.poolL*1.25, 1); HL.glintMat.opacity = .75*wet; }
 }

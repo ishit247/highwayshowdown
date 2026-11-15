@@ -8,7 +8,7 @@ const SND = {   // t: waveforms, g: osc gains, m: frequency multipliers, cb/ck/c
   sedan :{t:['triangle','sawtooth','sine'],     g:[.45,.12,.40], m:[2,1,4],   cb:350,ck:.28,ct:500,  vol:.75, drive:3,  q:.8,  lf:12, rough:.02},   // smooth, quiet 4-cyl
   muscle:{t:['sawtooth','square','triangle'],   g:[.45,.25,.35], m:[1,.5,2],   cb:180,ck:.17,ct:700,  vol:1.0, drive:14, q:1.6, lf:26, rough:.09, pop:{boom:[150,45], crack:[1800,3000], tail:4, body:800}},   // deep V8 burble
   coupe :{t:['sawtooth','square','triangle'],   g:[.38,.12,.30], m:[2,1,4],   cb:450,ck:.38,ct:1300, vol:.85, drive:8,  q:1.2, lf:15, rough:.03, pop:{boom:[230,70], crack:[3000,5000], tail:5, body:1200}},   // raspy inline-6
-  super :{t:['sawtooth','sawtooth','square'],   g:[.35,.25,.12], m:[2,1,6],   cb:650,ck:.50,ct:1700, vol:.9,  drive:10, q:1.4, lf:11, rough:.02, pop:{boom:[280,90], crack:[3500,6000], tail:3, body:1600}},   // high-revving V8 scream
+  super :{t:['sawtooth','sawtooth','square'],   g:[.42,.30,.10], m:[1,.5,2],  cb:380,ck:.22,ct:1100, vol:.9,  drive:16, q:.9, lf:34, rough:.08, pop:{boom:[280,90], crack:[3500,6000], tail:3, body:1600}},   // high-revving flat-plane V8: a raspy wail, not a pure tone (a square at 6x the pitch, a wide-open filter and no roughness made a beep)
 };
 const MASTER_GAIN = .32;   // the mix level that sounds right at the volume setting 1
 export const AU = {
