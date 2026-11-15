@@ -81,6 +81,7 @@ src/
   cars/rims.js           rim faces (canvas textures with cut-out gaps) and calipers for the Muscle GT, Coupe and Hypercar
   world/road.js          road shape: curvature, hills, trackAt, placeOn (no Three.js objects)
   world/track.js         road, grass and rail ribbons, trees and lamps
+  world/scenery.js       mountains, clouds, bushes, rocks, buildings (instanced, recycled by index with hash()), bridges and tunnels at fixed spacing; visual only
   sim/step.js            one simulation step: drive -> gearbox -> traffic -> score -> damage smoke
   sim/driving.js         pedals and steering from keys, speed, rail clamp, indicator self-cancel
   sim/gearbox.js         auto/manual/neutral, manual shifts (Q/E), pop queue, rpm, speedo needle

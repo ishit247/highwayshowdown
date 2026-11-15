@@ -2,7 +2,8 @@
 import * as THREE from '../three.js';
 import { scene } from '../render/scene.js';
 import { HALF, BARRIER, LANES } from '../config.js';
-import { DS, TX, TY, TZ, TH, kappa, ensure, trackAt } from './road.js';
+import { DS, TX, TY, TZ, TH, kappa, ensure, trackAt, hash } from './road.js';
+import { nearStructure } from './scenery.js';
 import { S } from '../state.js';
 
 /* textures */
@@ -107,7 +108,6 @@ export function updateTrack(){
 }
 
 /* scenery: trees + street lamps, recycled by index */
-const hash = n => { const x=Math.sin(n*12.9898)*43758.5453; return x-Math.floor(x); };
 function makeTree(){
   const g = new THREE.Group();
   const tr = new THREE.Mesh(new THREE.CylinderGeometry(.25,.35,2.2,6), new THREE.MeshLambertMaterial({color:0x5d4030})); tr.position.y=1.1; g.add(tr);
@@ -136,6 +136,7 @@ export function placeScenery(){
     for (let k=k0;k<k0+TPOOL-2;k++){
       const o = trees[sd][((k%TPOOL)+TPOOL)%TPOOL]; if (o.k===k) continue; o.k=k;
       const s = k*TREE_SP + hash(k*3.1+sd)*14; const p = trackAt(s), lat = side*(BARRIER+3+hash(k*1.7+sd*9)*(hash(k)>.6?60:18));
+      o.m.visible = !nearStructure(s);
       o.m.position.set(p.x-Math.cos(p.H)*lat, p.y, p.z+Math.sin(p.H)*lat);
       const sc = .8+hash(k*5.3)*1.1; o.m.scale.set(sc,sc,sc); o.m.rotation.y = hash(k)*6;
     }
@@ -143,6 +144,7 @@ export function placeScenery(){
     for (let k=l0;k<l0+LPOOL-2;k++){
       const o = lamps[sd][((k%LPOOL)+LPOOL)%LPOOL]; if (o.k===k) continue; o.k=k;
       const p = trackAt(k*LAMP_SP + sd*40), lat = side*(BARRIER+1.2);
+      o.m.visible = !nearStructure(k*LAMP_SP + sd*40);
       o.m.position.set(p.x-Math.cos(p.H)*lat, p.y, p.z+Math.sin(p.H)*lat);
       o.m.rotation.y = p.H + (side>0 ? Math.PI/2 : -Math.PI/2) + Math.PI; // arm reaches over road
     }

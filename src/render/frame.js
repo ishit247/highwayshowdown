@@ -4,6 +4,7 @@ import * as THREE from '../three.js';
 import { renderer, scene, camera, disposeObj, applyAtmosphere } from './scene.js';
 import { updateRain } from './rain.js';
 import { updateTrack, placeScenery, setGroundShade } from '../world/track.js';
+import { placeWorld, setSceneryShade } from '../world/scenery.js';
 import { buildCar, glowK } from '../cars/build-car.js';
 import { updateParts, updateFlames } from './effects.js';
 import { updateHeadlights } from './headlights.js';
@@ -56,7 +57,7 @@ function updateSky(dt){
   S.mist += ((S.weather === 'fog' ? 1 : 0) - S.mist) * Math.min(1, dt*.6);
   if (Math.abs(S.dark - darkShown) + Math.abs(S.rain - rainShown) + Math.abs(S.mist - mistShown) > .004){
     darkShown = S.dark; rainShown = S.rain; mistShown = S.mist;
-    applyAtmosphere(darkShown, rainShown, mistShown); setGroundShade(darkShown, rainShown, mistShown);
+    applyAtmosphere(darkShown, rainShown, mistShown); setGroundShade(darkShown, rainShown, mistShown); setSceneryShade(darkShown, rainShown, mistShown);
   }}
 export function render3D(dt){
   updateSky(dt);
@@ -74,7 +75,7 @@ export function render3D(dt){
   updateFlames(playerMesh.userData.flames);
 
   for (const t of traffic){ const m = trafficMeshes.get(t); placeOn(m, t.s, t.d, t.psi||0); spinWheels(m, t.v, 0, dt); }
-  updateTrack(); placeScenery(); updateParts(dt);
+  updateTrack(); placeScenery(); placeWorld(); updateParts(dt);
 
   const sl = slopeAt(S.s);
   const sh = S.shake*.12;

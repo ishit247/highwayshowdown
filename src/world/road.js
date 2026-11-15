@@ -22,7 +22,8 @@ export function trackAt(s){
   return { x:TX[i]+(TX[i+1]-TX[i])*u, y:TY[i]+(TY[i+1]-TY[i])*u,
            z:TZ[i]+(TZ[i+1]-TZ[i])*u, H:TH[i]+(TH[i+1]-TH[i])*u };
 }
-export const slopeAt = s => (elev(s+6)-elev(Math.max(0,s-6)))/12;
+export const hash = n => { const x=Math.sin(n*12.9898)*43758.5453; return x-Math.floor(x); };   // repeatable "random" 0..1 per number, so scenery stays where it was
+export const slopeAt =s => (elev(s+6)-elev(Math.max(0,s-6)))/12;
 
 // put an object at road coordinates (s along, d sideways, psi heading relative to the road)
 export function placeOn(mesh, s, d, psi){
