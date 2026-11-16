@@ -1,5 +1,5 @@
 /* Highway Showdown - service worker: makes the game work offline once it has been opened. */
-const CACHE = 'highway-dash-v16';   // bumped: scenery.js new (mountains, clouds, bushes, rocks, buildings, bridges, tunnels)
+const CACHE = 'highway-dash-v17';   // bumped: tunnel mountain in scenery.js, rain hidden under the tunnel roof
 const ASSETS = ['./car-game.html', './lib/three/three.module.js', './lib/three/three.core.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
   './src/main.js', './src/three.js', './src/config.js', './src/state.js', './src/game.js',
   './src/cars/specs.js', './src/cars/shapes.js', './src/cars/build-car.js', './src/cars/engine-bay.js', './src/cars/rims.js',

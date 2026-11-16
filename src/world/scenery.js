@@ -58,7 +58,7 @@ function placeBridges(){
   if (changed) bridgeParts.instanceMatrix.needsUpdate = true;
 }
 
-// A tunnel is a long row of arch segments: concrete inside, a grassy mound outside, a ring of light on every segment,
+// A tunnel is a long row of arch segments: concrete inside, a ring of light on every segment, a mountain over the top,
 // and a concrete portal (headwall with the arch cut out, cap and wing walls) at each end.
 const arch = (r, len) => new THREE.CylinderGeometry(r, r, len, 14, 1, true, Math.PI/2, Math.PI).rotateX(Math.PI/2);   // upper half-pipe along the road
 const PORTAL_HALF_W_M = TUNNEL_R + 6, PORTAL_H_M = TUNNEL_R + 3, PORTAL_THICK_M = 1.6, WING_LEN_M = 14;
@@ -73,8 +73,40 @@ const wallTex = THREE.canvasTexture(canvasOf(128, 128, (x, w, h) => {
   for (let i = 0; i < 1500; i++){ x.fillStyle = `rgba(0,0,0,${hash(i*2.9)*.12})`; x.fillRect(hash(i*7.3)*w, hash(i*1.3)*h, 2, 2); }
 }));
 const tunnelInside = instanced(arch(TUNNEL_R, SEG_LEN_M + .4), new THREE.MeshBasicMaterial({map: wallTex, side: THREE.BackSide}), TUNNEL_SEGS);
-const tunnelMound = instanced(arch(TUNNEL_R + .5, SEG_LEN_M + .4), new THREE.MeshLambertMaterial({color: 0x4b7a3a}), TUNNEL_SEGS);
 const tunnelLights = instanced(arch(TUNNEL_R - .15, .35), new THREE.MeshBasicMaterial({color: 0xffe6a8, side: THREE.BackSide}), TUNNEL_SEGS);
+// The mountain is one ridge mesh made of cross-section rings along the road, so it follows the road's bends. Its height
+// rises from just above the portals to the full ridge; its footprint widens with the height (constant side slope),
+// so it hugs the portal wall instead of burying the road beyond it. Rewritten only when the tunnel is recycled.
+const RIDGE_H_M = 120, RIDGE_SIDE = .8, RIDGE_END_RISE = .8, RIDGE_BASE_M = -4, RIDGE_LEVELS = 4;
+const RING_PTS = 2*RIDGE_LEVELS + 1, RINGS = TUNNEL_SEGS + 1;
+const ridgeGeo = (() => {
+  const g = new THREE.BufferGeometry(), index = new Uint16Array((RINGS - 1)*(RING_PTS - 1)*6);
+  let n = 0;
+  for (let r = 0; r < RINGS - 1; r++) for (let i = 0; i < RING_PTS - 1; i++){
+    const a = r*RING_PTS + i, c = a + RING_PTS; index.set([a, c, a + 1, a + 1, c, c + 1], n); n += 6;
+  }
+  g.setIndex(new THREE.BufferAttribute(index, 1));
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(RINGS*RING_PTS*3), 3));
+  g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(RINGS*RING_PTS*3), 3));
+  return g;
+})();
+const ridgeBands = [[.3, srgb(0x4f6340)], [.8, srgb(0x6d6a66)], [9, srgb(0xf2f4f7)]];   // grass, rock, snow by height
+const tunnelHill = new THREE.Mesh(ridgeGeo, new THREE.MeshLambertMaterial({vertexColors: true, flatShading: true, side: THREE.DoubleSide}));
+tunnelHill.frustumCulled = false; tunnelHill.visible = false; scene.add(tunnelHill);
+function shapeRidge(start, t){
+  const pos = ridgeGeo.attributes.position, col = ridgeGeo.attributes.color;
+  for (let r = 0; r < RINGS; r++){
+    const s = start + r*SEG_LEN_M, dist = Math.min(r*SEG_LEN_M, TUNNEL_LEN - r*SEG_LEN_M), p = trackAt(s), cos = Math.cos(p.H), sin = Math.sin(p.H);
+    const crag = 1 + .3*(hash(r*1.7 + t*13) - .5)*Math.min(1, dist/60);               // a craggy skyline, none at the portals
+    const h = Math.min(PORTAL_H_M + 3 + RIDGE_END_RISE*dist, RIDGE_H_M)*crag, halfW = h/RIDGE_SIDE;
+    for (let i = 0; i < RING_PTS; i++){
+      const level = i <= RIDGE_LEVELS ? i : 2*RIDGE_LEVELS - i, f = level/RIDGE_LEVELS, x = (i <= RIDGE_LEVELS ? -1 : 1)*(1 - f)*halfW;
+      const y = RIDGE_BASE_M + f*(h - RIDGE_BASE_M), v = r*RING_PTS + i, c = ridgeBands.find(b => y/RIDGE_H_M < b[0])[1];
+      pos.setXYZ(v, p.x - cos*x, p.y + y, p.z + sin*x); col.setXYZ(v, c.r, c.g, c.b);
+    }
+  }
+  pos.needsUpdate = col.needsUpdate = true;
+}
 const portalWalls = instanced(portalGeo, concrete, 2);
 const portalTrim = instanced(box, concrete, 2*3);            // per portal: cap on top, then two wing walls
 let tunnelShown = -2;                                        // index of the tunnel whose segments are loaded; -1 none, -2 nothing written yet
@@ -92,15 +124,17 @@ function placeTunnel(){
     const s = start + (j + .5)*SEG_LEN_M, p = trackAt(s);
     dummy.position.set(p.x, p.y, p.z); dummy.rotation.set(-Math.atan(slopeAt(s)), p.H, 0, 'YXZ');
     dummy.scale.set(on, 1, 1); dummy.updateMatrix();
-    tunnelInside.setMatrixAt(j, dummy.matrix); tunnelMound.setMatrixAt(j, dummy.matrix); tunnelLights.setMatrixAt(j, dummy.matrix);
+    tunnelInside.setMatrixAt(j, dummy.matrix); tunnelLights.setMatrixAt(j, dummy.matrix);
   }
+  tunnelHill.visible = want >= 0;
+  if (want >= 0) shapeRidge(start, want);
   [-1, 1].forEach((end, e) => {                              // end -1 = entrance, +1 = exit
     const s = end < 0 ? start + PORTAL_THICK_M/2 : start + TUNNEL_LEN - PORTAL_THICK_M/2;
     put(portalWalls, e, s, 0, 0, 0, 0, on, on, on);
     put(portalTrim, e*3, s, 0, PORTAL_H_M + .4, 0, 0, 2*PORTAL_HALF_W_M + 1, .8, PORTAL_THICK_M + 1.2*on);
     [-1, 1].forEach((side, w) => put(portalTrim, e*3 + 1 + w, s, side*(PORTAL_HALF_W_M - .4), 2.2, end*(WING_LEN_M/2 + PORTAL_THICK_M/2), 0, .8*on, 5.4, WING_LEN_M));
   });
-  for (const m of [tunnelInside, tunnelMound, tunnelLights, portalWalls, portalTrim]) m.instanceMatrix.needsUpdate = true;
+  for (const m of [tunnelInside, tunnelLights, portalWalls, portalTrim]) m.instanceMatrix.needsUpdate = true;
 }
 
 /* ---- belts: things recycled by index along each side of the road ---- */

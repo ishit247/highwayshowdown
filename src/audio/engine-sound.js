@@ -64,7 +64,7 @@ export const AU = {
     this.screech.fl.frequency.setTargetAtTime(1100+S.v*8,t,.1);
     this.wind.g.gain.setTargetAtTime(Math.pow(S.v/90,1.6)*.22,t,.1);
     this.road.g.gain.setTargetAtTime(Math.min(1,S.v/40)*.14*(1+.7*S.rain),t,.1);      // tyres hiss on a wet road
-    this.rain.g.gain.setTargetAtTime(S.started ? S.rain*.07 : 0,t,.3);                // drumming on the roof; silent in the menu
+    this.rain.g.gain.setTargetAtTime(S.started ? S.rain*(1 - S.roofed)*.07 : 0,t,.3);                // drumming on the roof; silent in the menu
     this.scrape.g.gain.setTargetAtTime(S.scrapeT>0 ? .12 : 0,t,.03);
     this.ac.g.gain.setTargetAtTime(S.ac ? .05 : 0,t,.2);
     this.horn.gain.setTargetAtTime(keys['h'] ? .07 : 0,t,.015);

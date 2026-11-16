@@ -4,7 +4,7 @@ import * as THREE from '../three.js';
 import { renderer, scene, camera, disposeObj, applyAtmosphere } from './scene.js';
 import { updateRain } from './rain.js';
 import { updateTrack, placeScenery, setGroundShade } from '../world/track.js';
-import { placeWorld, setSceneryShade } from '../world/scenery.js';
+import { placeWorld, setSceneryShade, inTunnel } from '../world/scenery.js';
 import { buildCar, glowK } from '../cars/build-car.js';
 import { updateParts, updateFlames } from './effects.js';
 import { updateHeadlights } from './headlights.js';
@@ -55,6 +55,7 @@ function updateSky(dt){
   S.dark += (target - S.dark) * Math.min(1, dt*1.5);                           // K eases between day and night instead of cutting
   S.rain += ((S.weather === 'rain' ? 1 : 0) - S.rain) * Math.min(1, dt*.6);                   // weather fades in over a few seconds
   S.mist += ((S.weather === 'fog' ? 1 : 0) - S.mist) * Math.min(1, dt*.6);
+  S.roofed += ((inTunnel(S.s) ? 1 : 0) - S.roofed) * Math.min(1, dt*8);                      // no rain under a tunnel roof; quick, as the portal is
   if (Math.abs(S.dark - darkShown) + Math.abs(S.rain - rainShown) + Math.abs(S.mist - mistShown) > .004){
     darkShown = S.dark; rainShown = S.rain; mistShown = S.mist;
     applyAtmosphere(darkShown, rainShown, mistShown); setGroundShade(darkShown, rainShown, mistShown); setSceneryShade(darkShown, rainShown, mistShown);
@@ -102,6 +103,6 @@ export function render3D(dt){
     camera.position.set(camPos.x+(Math.random()-.5)*sh, camPos.y+(Math.random()-.5)*sh, camPos.z);
     camera.lookAt(W.x+W.fx*8, W.y+1.0+sl*8, W.z+W.fz*8);
   }
-  updateRain(dt, S.rain, S.dark, camera.position.x, camera.position.y, camera.position.z);
+  updateRain(dt, S.rain*(1 - S.roofed), S.dark, camera.position.x, camera.position.y, camera.position.z);
   renderer.render(scene, camera);
 }

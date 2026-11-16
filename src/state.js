@@ -4,11 +4,11 @@ import { CARS } from './cars/specs.js';
 
 function freshState() {
   return {
-    s:0, d:0, psi:0, v:0, steer:0, throttle:0, brake:0, hand:0,
+    s:30, d:0, psi:0, v:0, steer:0, throttle:0, brake:0, hand:0,   // the road is built from s = 0, so start 30 m along it: the chase and free cameras then see road behind the car, not its edge
     gear:0, rpm:900, shiftT:0, health:100, pullBias:0, cracks:[],
     dist:0, overtakes:0, score:0, flash:0, shake:0, needle:0,
     ac:false, auto:true, neutral:false, rev:false, shAnim:0, lastGear:0,
-    popQ:[], flameI:0, sigL:false, sigR:false, sigSteer:0, lights:0, sky:'day', dark:0, clock:0, weather:'clear', rain:0, mist:0, hoodA:0, hoodOpen:false, cam:'fp', over:false, started:false, scrapeT:0, slip:0, cool:0, t:0, hint:12
+    popQ:[], flameI:0, sigL:false, sigR:false, sigSteer:0, lights:0, sky:'day', dark:0, clock:0, weather:'clear', rain:0, mist:0, roofed:0, hoodA:0, hoodOpen:false, cam:'fp', over:false, started:false, scrapeT:0, slip:0, cool:0, t:0, hint:12
   };
 }
 
